@@ -1,42 +1,41 @@
-
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-// Import routes
 const articleRoutes = require('./routes/articleRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+}));
+app.use(express.json({ limit: '2mb' }));
 
-// Register routes
-app.use('/api/articles', articleRoutes);
-
-// Homepage test
 app.get('/', (req, res) => {
   res.send('Welcome to Rwanda Today API!');
 });
 
-// API status
 app.get('/api/status', (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Rwanda Today backend is working!',
   });
 });
 
-// Connect to MongoDB
-const PORT = process.env.PORT || 5000;
+app.use('/api/auth', authRoutes);
+app.use('/api/articles', articleRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({ success: false, message: 'API route not found.' });
+});
 
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB connected successfully!');
-
     app.listen(PORT, () => {
       console.log(`Rwanda Today server running on port ${PORT}`);
     });
