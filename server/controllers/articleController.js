@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Article = require('../models/Article');
+const { isYouTubeUrl } = require('../utils/youtube');
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -104,8 +105,8 @@ const validateArticle = (data) => {
   if (data.featuredImage && !isHttpUrl(data.featuredImage)) {
     return 'Featured image must be a valid HTTP or HTTPS URL.';
   }
-  if (data.videoUrl && !isHttpUrl(data.videoUrl)) {
-    return 'Video URL must be a valid HTTP or HTTPS URL.';
+  if (data.videoUrl && !isYouTubeUrl(data.videoUrl)) {
+    return 'Video URL must be a valid YouTube video link.';
   }
   return null;
 };
@@ -158,8 +159,8 @@ const updateArticle = async (req, res) => {
     if (payload.featuredImage && !isHttpUrl(payload.featuredImage)) {
       return res.status(400).json({ success: false, message: 'Featured image must be a valid HTTP or HTTPS URL.' });
     }
-    if (payload.videoUrl && !isHttpUrl(payload.videoUrl)) {
-      return res.status(400).json({ success: false, message: 'Video URL must be a valid HTTP or HTTPS URL.' });
+    if (payload.videoUrl && !isYouTubeUrl(payload.videoUrl)) {
+      return res.status(400).json({ success: false, message: 'Video URL must be a valid YouTube video link.' });
     }
     if (payload.status === 'published') {
       const existing = await Article.findById(req.params.id).select('publishedAt status');
