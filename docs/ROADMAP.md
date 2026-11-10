@@ -14,6 +14,7 @@
 
 ## Phase 2: Editorial workflow and reader discovery
 - [ ] Rich-text editor with safe content rendering
+- [x] Embedded admin-only AI research assistant using web search to create source-linked drafts (requires OpenAI API credentials)
 - [x] Administrator category creation and activation/deactivation
 - [x] Safe unpublished draft preview in the admin editor
 - [x] Scheduled publishing with a server-side publishing worker (runs while the API is awake)
