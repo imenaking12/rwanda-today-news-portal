@@ -16,6 +16,7 @@ const articleSchema = new mongoose.Schema(
       index: true,
     },
     isFeatured: { type: Boolean, default: false },
+    isBreakingNews: { type: Boolean, default: false },
     tags: {
       type: [{ type: String, trim: true, maxlength: 40 }],
       default: [],
