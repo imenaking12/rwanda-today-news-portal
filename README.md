@@ -56,11 +56,13 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 ## Current features
 
 - Public newspaper homepage powered by published MongoDB articles.
-- Category filtering and headline search.
-- Article detail reading view.
+- Server-side article search, category filtering and pagination.
+- Featured-story ordering and article detail reading view.
 - Administrator sign-in with hashed passwords and signed, expiring bearer tokens.
 - Protected article creation, editing, publishing, draft saving and deletion.
 - Article fields for image URLs and optional YouTube links.
+- Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
+- Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 
 ## Important security notes
 
@@ -68,8 +70,12 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - The first administrator is created with the local one-time seed script, not a public registration endpoint.
 - The current admin token is stored in the browser session storage and expires after eight hours. A production deployment should move to secure, HttpOnly cookies, add login rate limiting, and configure strict deployment origins.
 - Media URLs are supported now. Direct Cloudinary uploads and media-library management are a later integration step.
-- Test all changes locally before merging the feature branch into `main`.
+- Test all changes locally before treating a release as production-ready.
 
-## Development branch
+## Automated checks
 
-Current development work is being built on `feature/rwanda-today-platform`. Merge it into `main` only after local verification.
+GitHub Actions runs backend unit tests and frontend ESLint/build checks for pull requests targeting `main` and pushes to `main` or feature branches. The backend tests can also be run locally with `npm test` from the `server/` directory.
+
+## Development
+
+Work is developed in feature branches and proposed through pull requests. The `main` branch remains the stable integration branch.

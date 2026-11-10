@@ -12,23 +12,26 @@
 - [x] Initial administrator dashboard and article editor
 - [ ] Verify the full flow locally and fix any runtime issues
 
-## Phase 2: Editorial workflow
+## Phase 2: Editorial workflow and reader discovery
 - [ ] Rich-text editor with safe content rendering
 - [ ] Category management
 - [ ] Draft preview and scheduled publishing
 - [ ] Breaking-news ticker and homepage story ordering
 - [ ] Article SEO fields, slugs, social sharing and related stories
+- [x] Server-side category filtering and search
+- [x] Paginated public article feed
 
 ## Phase 3: Media
 - [ ] Cloudinary account and server-side upload integration
 - [ ] Image and video upload validation
 - [ ] Media library with reusable assets
-- [ ] Embedded YouTube player with URL validation
+- [x] Embedded YouTube player with URL validation
+- [x] Backend unit tests for supported and rejected YouTube URL formats
+- [x] GitHub Actions workflow for backend tests and frontend lint/build
 - [ ] Galleries and video news pages
 
 ## Phase 4: Reader experience
 - [ ] Responsive category pages and article URLs
-- [ ] Pagination and server-side search
 - [ ] Related stories, bookmarks and reading history
 - [ ] Newsletter subscriptions
 - [ ] About, contact, corrections, privacy and editorial policy pages

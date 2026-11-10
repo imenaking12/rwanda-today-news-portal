@@ -16,7 +16,6 @@ export default function AdminDashboard({ admin, onLogout }) {
   const [error, setError] = useState('');
 
   const loadArticles = async () => {
-    setLoading(true);
     try {
       const data = await apiRequest('/articles/admin/all');
       setArticles(data.articles || []);

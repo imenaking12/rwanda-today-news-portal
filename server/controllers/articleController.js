@@ -1,11 +1,57 @@
 const mongoose = require('mongoose');
 const Article = require('../models/Article');
+const { isYouTubeUrl } = require('../utils/youtube');
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const getArticles = async (req, res) => {
   try {
-    const articles = await Article.find({ status: 'published' })
-      .sort({ publishedAt: -1, createdAt: -1 });
-    res.status(200).json({ success: true, count: articles.length, articles });
+    const requestedPage = Number.parseInt(req.query.page, 10);
+    const requestedLimit = Number.parseInt(req.query.limit, 10);
+    const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+    const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+      ? Math.min(requestedLimit, 24)
+      : 9;
+
+    const filter = { status: 'published' };
+    const category = typeof req.query.category === 'string' ? req.query.category.trim() : '';
+    const search = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 100) : '';
+
+    if (category && category.toLowerCase() !== 'home') {
+      filter.category = category;
+    }
+
+    if (search) {
+      const safeSearch = new RegExp(escapeRegex(search), 'i');
+      filter.$or = [
+        { title: safeSearch },
+        { excerpt: safeSearch },
+        { content: safeSearch },
+        { category: safeSearch },
+        { tags: safeSearch },
+      ];
+    }
+
+    const [articles, total] = await Promise.all([
+      Article.find(filter)
+        .sort({ isFeatured: -1, publishedAt: -1, createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      Article.countDocuments(filter),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      count: total,
+      articles,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.max(1, Math.ceil(total / limit)),
+      },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Unable to load articles.' });
   }
@@ -38,13 +84,41 @@ const validateArticle = (data) => {
   if (!data.title || !data.excerpt || !data.content || !data.category) {
     return 'Title, excerpt, content and category are required.';
   }
+  if (typeof data.title !== 'string' || data.title.trim().length > 180) {
+    return 'Headline must be a text value no longer than 180 characters.';
+  }
+  if (typeof data.excerpt !== 'string' || data.excerpt.trim().length > 320) {
+    return 'Summary must be a text value no longer than 320 characters.';
+  }
+  if (typeof data.content !== 'string' || data.content.length > 100000) {
+    return 'Article content must be text and cannot exceed 100,000 characters.';
+  }
+  if (typeof data.category !== 'string' || data.category.trim().length > 60) {
+    return 'Category must be a text value no longer than 60 characters.';
+  }
   if (!['draft', 'published'].includes(data.status || 'draft')) {
     return 'Status must be draft or published.';
   }
-  if (data.tags !== undefined && !Array.isArray(data.tags)) {
+  if (data.tags !== undefined && (!Array.isArray(data.tags) || data.tags.some((tag) => typeof tag !== 'string'))) {
     return 'Tags must be an array of strings.';
   }
+  if (data.featuredImage && !isHttpUrl(data.featuredImage)) {
+    return 'Featured image must be a valid HTTP or HTTPS URL.';
+  }
+  if (data.videoUrl && !isYouTubeUrl(data.videoUrl)) {
+    return 'Video URL must be a valid YouTube video link.';
+  }
   return null;
+};
+
+const isHttpUrl = (value) => {
+  if (typeof value !== 'string') return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
 };
 
 const createArticle = async (req, res) => {
@@ -74,10 +148,29 @@ const updateArticle = async (req, res) => {
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) payload[field] = req.body[field];
     }
+
+    if (Object.keys(payload).length === 0) {
+      return res.status(400).json({ success: false, message: 'No article changes were provided.' });
+    }
+
     if (payload.status && !['draft', 'published'].includes(payload.status)) {
       return res.status(400).json({ success: false, message: 'Status must be draft or published.' });
     }
-    if (payload.status === 'published') payload.publishedAt = new Date();
+    if (payload.featuredImage && !isHttpUrl(payload.featuredImage)) {
+      return res.status(400).json({ success: false, message: 'Featured image must be a valid HTTP or HTTPS URL.' });
+    }
+    if (payload.videoUrl && !isYouTubeUrl(payload.videoUrl)) {
+      return res.status(400).json({ success: false, message: 'Video URL must be a valid YouTube video link.' });
+    }
+    if (payload.status === 'published') {
+      const existing = await Article.findById(req.params.id).select('publishedAt status');
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'Article not found.' });
+      }
+      if (existing.status !== 'published' || !existing.publishedAt) {
+        payload.publishedAt = new Date();
+      }
+    }
     if (payload.status === 'draft') payload.publishedAt = null;
 
     const article = await Article.findByIdAndUpdate(req.params.id, payload, {

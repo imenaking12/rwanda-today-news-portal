@@ -1,81 +1,32 @@
-
 const mongoose = require('mongoose');
 
 const articleSchema = new mongoose.Schema(
   {
-    // Article headline
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    // Short description
-    excerpt: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    // Main article content
-    content: {
-      type: String,
-      required: true,
-    },
-
-    // Article category
-    category: {
-      type: String,
-      required: true,
-    },
-
-    // Author name
-    author: {
-      type: String,
-      default: 'Rwanda Today',
-    },
-
-    // Featured image URL
-    featuredImage: {
-      type: String,
-      default: '',
-    },
-
-    // Optional YouTube video URL
-    videoUrl: {
-      type: String,
-      default: '',
-    },
-
-    // Article status
+    title: { type: String, required: true, trim: true, maxlength: 180 },
+    excerpt: { type: String, required: true, trim: true, maxlength: 320 },
+    content: { type: String, required: true, maxlength: 100000 },
+    category: { type: String, required: true, trim: true, maxlength: 60 },
+    author: { type: String, default: 'Rwanda Today', trim: true, maxlength: 100 },
+    featuredImage: { type: String, default: '' },
+    videoUrl: { type: String, default: '' },
     status: {
       type: String,
       enum: ['draft', 'published'],
       default: 'draft',
+      index: true,
     },
-
-    // Featured article on homepage
-    isFeatured: {
-      type: Boolean,
-      default: false,
-    },
-
-    // Article tags
+    isFeatured: { type: Boolean, default: false },
     tags: {
-      type: [String],
+      type: [{ type: String, trim: true, maxlength: 40 }],
       default: [],
     },
-
-    // Publication date
-    publishedAt: {
-      type: Date,
-      default: null,
-    },
+    publishedAt: { type: Date, default: null },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
+
+articleSchema.index({ status: 1, isFeatured: -1, publishedAt: -1, createdAt: -1 });
+articleSchema.index({ status: 1, category: 1, publishedAt: -1 });
 
 const Article = mongoose.model('Article', articleSchema);
 
