@@ -15,7 +15,7 @@ const createDraftFromChatGPT = async (req, res) => {
   try {
     const {
       title, excerpt, content, category, author,
-      featuredImage, videoUrl, tags,
+      featuredImage, videoUrl, tags, sources,
     } = req.body || {};
 
     if (![title, excerpt, content, category].every((value) => typeof value === 'string' && value.trim())) {
@@ -44,6 +44,16 @@ const createDraftFromChatGPT = async (req, res) => {
       return res.status(400).json({ success: false, message: 'tags must be an array of up to 20 short text values.' });
     }
 
+    if (sources !== undefined && (
+      !Array.isArray(sources) ||
+      sources.length > 20 ||
+      sources.some((source) => !source || typeof source.title !== 'string' ||
+        source.title.trim().length === 0 || source.title.length > 180 ||
+        !isHttpUrl(source.url))
+    )) {
+      return res.status(400).json({ success: false, message: 'sources must contain up to 20 entries with a title and valid HTTP or HTTPS URL.' });
+    }
+
     const article = await Article.create({
       title: title.trim(),
       excerpt: excerpt.trim(),
@@ -53,6 +63,7 @@ const createDraftFromChatGPT = async (req, res) => {
       featuredImage: featuredImage || '',
       videoUrl: videoUrl || '',
       tags: tags || [],
+      sources: (sources || []).map((source) => ({ title: source.title.trim(), url: source.url })),
       status: 'draft',
       isFeatured: false,
       publishedAt: null,
