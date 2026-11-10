@@ -66,6 +66,7 @@ paths:
                       url:
                         type: string
                         format: uri
+                        maxLength: 2048
       responses:
         '201':
           description: Draft saved successfully; publication still requires administrator approval.
