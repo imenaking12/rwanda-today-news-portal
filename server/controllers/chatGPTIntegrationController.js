@@ -1,4 +1,5 @@
 const Article = require('../models/Article');
+const Category = require('../models/Category');
 const { isYouTubeUrl } = require('../utils/youtube');
 
 const isHttpUrl = (value) => {
@@ -27,9 +28,45 @@ const createDraftFromChatGPT = async (req, res) => {
     if (title.trim().length > 180 || excerpt.trim().length > 320 || content.length > 100000 || category.trim().length > 60) {
       return res.status(400).json({ success: false, message: 'One or more article fields exceed the allowed length.' });
     }
-    const allowedCategories = ['Rwanda', 'Politics', 'Business', 'Sports', 'Entertainment', 'Technology', 'World', 'Opinion'];
+    const activeCategory = await Category.findOne({
+      name: { $regex: new RegExp(`^${category.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\    const allowedCategories = ['Rwanda', 'Politics', 'Business', 'Sports', 'Entertainment', 'Technology', 'World', 'Opinion'];
     if (!allowedCategories.includes(category.trim())) {
       return res.status(400).json({ success: false, message: 'category must be one of the supported Rwanda Today categories.' });
+    }')}const Article = require('../models/Article');
+const Category = require('../models/Category');
+const { isYouTubeUrl } = require('../utils/youtube');
+
+const isHttpUrl = (value) => {
+  if (typeof value !== 'string') return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+const createDraftFromChatGPT = async (req, res) => {
+  try {
+    const {
+      title, excerpt, content, category, author,
+      featuredImage, videoUrl, tags, sources, metaTitle, metaDescription,
+    } = req.body || {};
+
+    if (![title, excerpt, content, category].every((value) => typeof value === 'string' && value.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: 'title, excerpt, content and category are required text fields.',
+      });
+    }
+    if (title.trim().length > 180 || excerpt.trim().length > 320 || content.length > 100000 || category.trim().length > 60) {
+      return res.status(400).json({ success: false, message: 'One or more article fields exceed the allowed length.' });
+    }
+, 'i') },
+      isActive: true,
+    }).select('name');
+    if (!activeCategory) {
+      return res.status(400).json({ success: false, message: 'Choose an active category from the Rwanda Today category list.' });
     }
     if (metaTitle !== undefined && (typeof metaTitle !== 'string' || metaTitle.length > 70)) {
       return res.status(400).json({ success: false, message: 'metaTitle must be text no longer than 70 characters.' });
@@ -64,7 +101,7 @@ const createDraftFromChatGPT = async (req, res) => {
       title: title.trim(),
       excerpt: excerpt.trim(),
       content,
-      category: category.trim(),
+      category: activeCategory.name,
       author: author?.trim() || 'Rwanda Today',
       featuredImage: featuredImage || '',
       videoUrl: videoUrl || '',
