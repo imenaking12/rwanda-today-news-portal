@@ -20,6 +20,7 @@ const articleSchema = new mongoose.Schema(
       index: true,
     },
     isFeatured: { type: Boolean, default: false },
+    homepageOrder: { type: Number, default: 0, min: 0, max: 999 },
     isBreakingNews: { type: Boolean, default: false },
     tags: {
       type: [{ type: String, trim: true, maxlength: 40 }],
@@ -44,7 +45,7 @@ articleSchema.pre('validate', function () {
   if (!this.metaDescription && this.excerpt) this.metaDescription = this.excerpt.slice(0, 180);
 });
 
-articleSchema.index({ status: 1, isFeatured: -1, publishedAt: -1, createdAt: -1 });
+articleSchema.index({ status: 1, isFeatured: -1, homepageOrder: -1, publishedAt: -1, createdAt: -1 });
 articleSchema.index({ status: 1, category: 1, publishedAt: -1 });
 
 const Article = mongoose.model('Article', articleSchema);
