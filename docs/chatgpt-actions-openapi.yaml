@@ -51,6 +51,21 @@ paths:
                   items:
                     type: string
                     maxLength: 40
+                sources:
+                  type: array
+                  maxItems: 20
+                  description: Research references for the editor to verify before publication.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [title, url]
+                    properties:
+                      title:
+                        type: string
+                        maxLength: 180
+                      url:
+                        type: string
+                        format: uri
       responses:
         '201':
           description: Draft saved successfully; publication still requires administrator approval.
