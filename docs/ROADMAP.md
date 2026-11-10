@@ -25,7 +25,9 @@
 - [ ] Cloudinary account and server-side upload integration
 - [ ] Image and video upload validation
 - [ ] Media library with reusable assets
-- [ ] Embedded YouTube player with URL validation
+- [x] Embedded YouTube player with URL validation
+- [x] Backend unit tests for supported and rejected YouTube URL formats
+- [x] GitHub Actions workflow for backend tests and frontend lint/build
 - [ ] Galleries and video news pages
 
 ## Phase 4: Reader experience
