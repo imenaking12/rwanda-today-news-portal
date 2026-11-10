@@ -25,6 +25,9 @@ export default function AdminDashboard({ admin, onLogout }) {
   const [error, setError] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [aiTopic, setAiTopic] = useState('');
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiResult, setAiResult] = useState(null);
 
   const loadArticles = async () => {
     try {
@@ -70,6 +73,29 @@ export default function AdminDashboard({ admin, onLogout }) {
       .catch(() => {});
     return () => { active = false; };
   }, []);
+
+  const createAiDraft = async (event) => {
+    event.preventDefault();
+    if (!aiTopic.trim()) return;
+    setAiBusy(true);
+    setError('');
+    setMessage('');
+    setAiResult(null);
+    try {
+      const data = await apiRequest('/editorial-ai/drafts', {
+        method: 'POST',
+        body: JSON.stringify({ topic: aiTopic.trim() }),
+      });
+      setAiResult(data.article);
+      setAiTopic('');
+      setMessage(data.message);
+      await loadArticles();
+    } catch (err) {
+      setError(err.message || 'The newsroom AI could not create a draft.');
+    } finally {
+      setAiBusy(false);
+    }
+  };
 
   const createCategory = async (event) => {
     event.preventDefault();
@@ -242,6 +268,25 @@ export default function AdminDashboard({ admin, onLogout }) {
 
         {message && <p className="form-success">{message}</p>}
         {error && <p className="form-error">{error}</p>}
+
+        <section className="ai-editor-panel">
+          <div className="panel-heading"><div><p className="eyebrow">RESEARCH ASSISTANT</p><h2>Ask AI to research a story</h2></div><span className="ai-status">ADMIN ONLY</span></div>
+          <p className="muted">Describe the news topic. The assistant searches the web, prepares an original article with source references and saves it as a private draft. It never publishes automatically.</p>
+          <form onSubmit={createAiDraft}>
+            <label className="full-field">What should Rwanda Today investigate?
+              <textarea value={aiTopic} onChange={(event) => setAiTopic(event.target.value)} rows="3" maxLength="3000" required placeholder="Example: Research the latest official updates about a new transport project in Kigali. Compare statements from government sources and reputable news outlets." />
+            </label>
+            <div className="ai-editor-actions"><span className="muted">Web research · source references · draft only</span><button className="primary-button" type="submit" disabled={aiBusy || !aiTopic.trim()}>{aiBusy ? 'Researching and drafting…' : 'Research and create draft'}</button></div>
+          </form>
+          {aiResult && <div className="ai-draft-result" role="status">
+            <p className="eyebrow">DRAFT SAVED · NOT PUBLISHED</p>
+            <h3>{aiResult.title}</h3>
+            <p>{aiResult.excerpt}</p>
+            <p className="muted">Category: {aiResult.category} · Status: {aiResult.status}</p>
+            {aiResult.sources?.length > 0 && <div><strong>Research references</strong><ul>{aiResult.sources.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a></li>)}</ul></div>}
+            <p className="muted">Open this draft in the article list to fact-check and edit it before publishing.</p>
+          </div>}
+        </section>
 
         <section className="editor-panel">
           <div className="panel-heading"><h2>{editingId ? 'Edit article' : 'Write a new article'}</h2><div className="row-actions"><button type="button" className="text-button" onClick={() => setPreviewOpen((open) => !open)}>{previewOpen ? 'Hide preview' : 'Preview draft'}</button>{editingId && <button type="button" className="text-button" onClick={resetForm}>Cancel editing</button>}</div></div>
