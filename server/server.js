@@ -7,6 +7,7 @@ const articleRoutes = require('./routes/articleRoutes');
 const authRoutes = require('./routes/authRoutes');
 const chatGPTIntegrationRoutes = require('./routes/chatGPTIntegrationRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const mediaRoutes = require('./routes/mediaRoutes');
 const { ensureDefaultCategories } = require('./services/defaultCategories');
 const { startPublishScheduler } = require('./services/publishScheduler');
 
@@ -44,6 +45,7 @@ app.get('/api/status', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/media', mediaRoutes);
 app.use('/api/integrations/chatgpt', chatGPTIntegrationRoutes);
 
 app.use((req, res) => {
