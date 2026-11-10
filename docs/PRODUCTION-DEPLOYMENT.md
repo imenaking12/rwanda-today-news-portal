@@ -34,6 +34,8 @@ Set the following environment variables in Render's private environment settings
 | `MONGO_URI` | Newly rotated MongoDB Atlas connection string |
 | `JWT_SECRET` | New random secret, at least 32 characters |
 | `CHATGPT_INTEGRATION_TOKEN` | New random private token, at least 32 characters |
+| `OPENAI_API_KEY` | Private OpenAI API key for the embedded newsroom AI assistant |
+| `OPENAI_MODEL` | Optional model override; defaults to `gpt-6-luna` |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret |
@@ -81,6 +83,8 @@ Add the custom domain to Cloudflare Pages and verify HTTPS before using it in th
 9. Publish the test story only if it is clearly labelled as a test; otherwise delete the test draft after verification.
 
 The ChatGPT Action can create drafts only. It cannot publish, edit or delete articles. Keep that human editorial approval boundary.
+
+- [ ] Set `OPENAI_API_KEY` privately in Render and verify the dashboard AI research assistant creates a cited unpublished draft. OpenAI API usage is billed separately from a ChatGPT subscription.
 
 ## 5. Production acceptance checklist
 
