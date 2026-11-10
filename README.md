@@ -61,6 +61,8 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - Administrator sign-in with hashed passwords and signed, expiring bearer tokens.
 - Protected article creation, editing, publishing, draft saving and deletion.
 - Article fields for image URLs and optional YouTube links.
+- Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
+- Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 
 ## Important security notes
 
@@ -69,6 +71,10 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - The current admin token is stored in the browser session storage and expires after eight hours. A production deployment should move to secure, HttpOnly cookies, add login rate limiting, and configure strict deployment origins.
 - Media URLs are supported now. Direct Cloudinary uploads and media-library management are a later integration step.
 - Test all changes locally before treating a release as production-ready.
+
+## Automated checks
+
+GitHub Actions runs backend unit tests and frontend ESLint/build checks for pull requests targeting `main` and pushes to `main` or feature branches. The backend tests can also be run locally with `npm test` from the `server/` directory.
 
 ## Development
 
