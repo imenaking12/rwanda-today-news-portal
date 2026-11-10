@@ -34,7 +34,7 @@ const getArticles = async (req, res) => {
 
     const [articles, total] = await Promise.all([
       Article.find(filter)
-        .sort({ isFeatured: -1, publishedAt: -1, createdAt: -1 })
+        .sort({ isFeatured: -1, homepageOrder: -1, publishedAt: -1, createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
@@ -101,7 +101,7 @@ const getRelatedArticles = async (req, res) => {
       category: currentArticle.category,
       _id: { $ne: currentArticle._id },
     })
-      .sort({ isFeatured: -1, publishedAt: -1 })
+      .sort({ isFeatured: -1, homepageOrder: -1, publishedAt: -1 })
       .limit(3)
       .lean();
     res.status(200).json({ success: true, articles });
@@ -130,7 +130,7 @@ const getArticleById = async (req, res) => {
 
 const allowedFields = [
   'title', 'excerpt', 'content', 'category', 'author',
-  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'isBreakingNews', 'tags', 'metaTitle', 'metaDescription', 'scheduledAt',
+  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'homepageOrder', 'isBreakingNews', 'tags', 'metaTitle', 'metaDescription', 'scheduledAt',
 ];
 
 const validateArticle = (data) => {
@@ -163,6 +163,9 @@ const validateArticle = (data) => {
   }
   if (data.metaDescription !== undefined && (typeof data.metaDescription !== 'string' || data.metaDescription.length > 180)) {
     return 'SEO description must be text no longer than 180 characters.';
+  }
+  if (data.homepageOrder !== undefined && (!Number.isInteger(data.homepageOrder) || data.homepageOrder < 0 || data.homepageOrder > 999)) {
+    return 'Homepage priority must be a whole number between 0 and 999.';
   }
   if (data.isBreakingNews !== undefined && typeof data.isBreakingNews !== 'boolean') {
     return 'Breaking-news selection must be true or false.';
@@ -247,6 +250,9 @@ const updateArticle = async (req, res) => {
     }
     if (payload.metaDescription !== undefined && (typeof payload.metaDescription !== 'string' || payload.metaDescription.length > 180)) {
       return res.status(400).json({ success: false, message: 'SEO description must be text no longer than 180 characters.' });
+    }
+    if (payload.homepageOrder !== undefined && (!Number.isInteger(payload.homepageOrder) || payload.homepageOrder < 0 || payload.homepageOrder > 999)) {
+      return res.status(400).json({ success: false, message: 'Homepage priority must be a whole number between 0 and 999.' });
     }
     if (payload.isBreakingNews !== undefined && typeof payload.isBreakingNews !== 'boolean') {
       return res.status(400).json({ success: false, message: 'Breaking-news selection must be true or false.' });

@@ -20,7 +20,7 @@
 - [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts using active newsroom-managed categories
 - [x] Save and display article research source references for editorial verification
 - [x] Admin-managed breaking-news ticker for published stories
-- [ ] Homepage story ordering
+- [x] Administrator-controlled homepage story priority (0–999), with featured stories retaining top priority
 - [x] Article SEO titles/descriptions and unique readable slugs
 - [x] Public article detail routes using slugs
 - [x] Story sharing with Web Share API and clipboard fallback
