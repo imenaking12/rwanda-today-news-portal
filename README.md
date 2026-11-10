@@ -63,7 +63,7 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 
 - Public newspaper homepage powered by published MongoDB articles.
 - Server-side article search, category filtering and pagination.
-- SEO-friendly article slugs, shareable article URLs, editable search metadata, related stories and story sharing.
+- SEO-friendly article slugs, shareable article URLs, editable search metadata, related stories, story sharing, XML sitemap and RSS feed.
 - Reader bookmarks and reading history saved locally in the current browser.
 - Featured-story ordering, admin-managed categories and breaking-news ticker, and article detail reading view.
 - Administrator sign-in with hashed passwords and signed, expiring bearer tokens.
@@ -75,6 +75,8 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 
 Saved stories and reading history are stored in the reader's browser only; they are not synced across devices.
+
+Set `PUBLIC_SITE_URL` to the deployed public website origin so sitemap and RSS links point to the live site. The public feeds are available at `/api/seo/sitemap.xml` and `/api/seo/rss.xml`.
 
 ## ChatGPT newsroom integration
 

@@ -45,7 +45,8 @@
 - [x] Saved stories/bookmarks and reading history (stored locally in the reader's browser)
 - [ ] Newsletter subscriptions
 - [ ] About, contact, corrections, privacy and editorial policy pages
-- [ ] Accessibility, metadata, sitemap and performance improvements
+- [ ] Accessibility and performance improvements
+- [x] Dynamic XML sitemap and RSS feed endpoints (set PUBLIC_SITE_URL for production)
 
 ## Phase 5: Production readiness
 - [ ] Secure HttpOnly cookie sessions and CSRF strategy
