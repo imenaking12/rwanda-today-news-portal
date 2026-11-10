@@ -46,6 +46,7 @@ const getYouTubeEmbedUrl = (value) => {
 
 function PublicSite() {
   const [articles, setArticles] = useState([]);
+  const [breakingNews, setBreakingNews] = useState([]);
   const [category, setCategory] = useState('Home');
   const [search, setSearch] = useState('');
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -75,6 +76,18 @@ function PublicSite() {
 
     return () => { active = false; };
   }, [category, search, page]);
+
+  useEffect(() => {
+    let active = true;
+    apiRequest('/articles/breaking')
+      .then((data) => {
+        if (active) setBreakingNews(data.articles || []);
+      })
+      .catch(() => {
+        if (active) setBreakingNews([]);
+      });
+    return () => { active = false; };
+  }, []);
 
   const featured = articles.find((article) => article.isFeatured) || articles[0];
   const remaining = articles.filter((article) => article._id !== featured?._id);
@@ -111,7 +124,7 @@ function PublicSite() {
         </nav>
       </header>
 
-      <div className="breaking-strip"><strong>RWANDA TODAY</strong><span>Independent reporting from Rwanda and around the world.</span></div>
+      <div className="breaking-strip"><strong>BREAKING NEWS</strong>{breakingNews.length > 0 ? <div className="breaking-headlines">{breakingNews.map((story) => <button key={story._id} onClick={() => setSelectedArticle(story)}>{story.title}</button>)}</div> : <span>Independent reporting from Rwanda and around the world.</span>}</div>
 
       <main className="home-content">
         <div className="section-title">

@@ -19,7 +19,8 @@
 - [ ] Scheduled publishing
 - [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts
 - [x] Save and display article research source references for editorial verification
-- [ ] Breaking-news ticker and homepage story ordering
+- [x] Admin-managed breaking-news ticker for published stories
+- [ ] Homepage story ordering
 - [ ] Article SEO fields, slugs, social sharing and related stories
 - [x] Server-side category filtering and search
 - [x] Paginated public article feed
@@ -43,7 +44,6 @@
 ## Phase 5: Production readiness
 - [ ] Secure HttpOnly cookie sessions and CSRF strategy
 - [x] Baseline security headers and in-memory administrator login rate limiting
-- [ ] Login rate limiting, validation and security headers
 - [ ] Role/permission model and audit logs
 - [x] Automated backend tests and GitHub Actions workflow added (checks must pass before merge)
 - [ ] Error monitoring, backups and deployment configuration
