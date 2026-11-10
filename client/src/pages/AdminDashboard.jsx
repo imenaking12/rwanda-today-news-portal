@@ -160,7 +160,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <div className="admin-article-list">
               {articles.map((article) => (
                 <article className="admin-article-row" key={article._id}>
-                  <div><span className={`status-pill ${article.status}`}>{article.status}</span><h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p></div>
+                  <div><span className={`status-pill ${article.status}`}>{article.status}</span><h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p>{article.sources?.length > 0 && <p className="source-list">Research sources: {article.sources.map((source, index) => <a key={source.url + index} href={source.url} target="_blank" rel="noreferrer">{source.title}</a>)}</p>}</div>
                   <div className="row-actions"><button className="outline-button" onClick={() => editArticle(article)}>Edit</button><button className="danger-button" onClick={() => deleteArticle(article._id)}>Delete</button></div>
                 </article>
               ))}
