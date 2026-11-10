@@ -60,8 +60,6 @@ function PublicSite() {
     if (category !== 'Home') params.set('category', category);
     if (search.trim()) params.set('q', search.trim());
 
-    setLoading(true);
-    setApiError('');
     apiRequest(`/articles?${params.toString()}`)
       .then((data) => {
         if (!active) return;
@@ -152,10 +150,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!getStoredToken()) {
-      setCheckingSession(false);
-      return;
-    }
+    if (!getStoredToken()) return;
     apiRequest('/auth/me')
       .then((data) => setAdmin(data.admin))
       .catch(() => clearAdminToken())
