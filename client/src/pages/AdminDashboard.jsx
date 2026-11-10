@@ -159,7 +159,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <h2>{form.title || 'Your headline will appear here'}</h2>
             <p className="preview-excerpt">{form.excerpt || 'Your short summary will appear here.'}</p>
             {form.featuredImage && <img src={form.featuredImage} alt="Article preview" />}
-            <div className="preview-content">{form.content ? form.content.split('\\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>) : <p>Your article text will appear here.</p>}</div>
+            <div className="preview-content">{form.content ? form.content.split('\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>) : <p>Your article text will appear here.</p>}</div>
           </section>}
         </section>
 
