@@ -15,7 +15,8 @@
 ## Phase 2: Editorial workflow and reader discovery
 - [ ] Rich-text editor with safe content rendering
 - [ ] Category management
-- [ ] Draft preview and scheduled publishing
+- [x] Safe unpublished draft preview in the admin editor
+- [ ] Scheduled publishing
 - [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts
 - [x] Save and display article research source references for editorial verification
 - [ ] Breaking-news ticker and homepage story ordering
@@ -41,6 +42,7 @@
 
 ## Phase 5: Production readiness
 - [ ] Secure HttpOnly cookie sessions and CSRF strategy
+- [x] Baseline security headers and in-memory administrator login rate limiting
 - [ ] Login rate limiting, validation and security headers
 - [ ] Role/permission model and audit logs
 - [x] Automated backend tests and GitHub Actions workflow added (checks must pass before merge)
