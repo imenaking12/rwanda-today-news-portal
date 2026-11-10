@@ -16,13 +16,14 @@
 - [ ] Rich-text editor with safe content rendering
 - [ ] Category management
 - [ ] Draft preview and scheduled publishing
+- [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts
 - [ ] Breaking-news ticker and homepage story ordering
 - [ ] Article SEO fields, slugs, social sharing and related stories
 - [x] Server-side category filtering and search
 - [x] Paginated public article feed
 
 ## Phase 3: Media
-- [ ] Cloudinary account and server-side upload integration
+- [ ] Cloudinary account and server-side upload integration (requires your Cloudinary account)
 - [ ] Image and video upload validation
 - [ ] Media library with reusable assets
 - [x] Embedded YouTube player with URL validation
@@ -41,9 +42,9 @@
 - [ ] Secure HttpOnly cookie sessions and CSRF strategy
 - [ ] Login rate limiting, validation and security headers
 - [ ] Role/permission model and audit logs
-- [ ] Automated tests and GitHub Actions checks
+- [x] Automated backend tests and GitHub Actions workflow added (checks must pass before merge)
 - [ ] Error monitoring, backups and deployment configuration
-- [ ] Production deployment and custom domain
+- [ ] Production deployment, API domain, ChatGPT Action connection and custom domain (requires your deployment/domain accounts)
 
 ## Editorial categories
 
