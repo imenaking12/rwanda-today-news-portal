@@ -9,6 +9,7 @@ const chatGPTIntegrationRoutes = require('./routes/chatGPTIntegrationRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 const seoRoutes = require('./routes/seoRoutes');
+const editorialAiRoutes = require('./routes/editorialAiRoutes');
 const { ensureDefaultCategories } = require('./services/defaultCategories');
 const { startPublishScheduler } = require('./services/publishScheduler');
 
@@ -48,6 +49,7 @@ app.use('/api/articles', articleRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/seo', seoRoutes);
+app.use('/api/editorial-ai', editorialAiRoutes);
 app.use('/api/integrations/chatgpt', chatGPTIntegrationRoutes);
 
 app.use((req, res) => {

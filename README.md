@@ -71,12 +71,17 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - A backend worker checks for due scheduled stories every 30 seconds and publishes them automatically while the API process is running.
 - Article fields for image URLs and optional YouTube links.
 - Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
+- Administrator-only newsroom AI assistant that researches topics with web search and creates source-linked unpublished drafts using the OpenAI Responses API (requires a private OpenAI API key and API billing).
 - Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 
 Saved stories and reading history are stored in the reader's browser only; they are not synced across devices.
 
 Set `PUBLIC_SITE_URL` to the deployed public website origin so sitemap and RSS links point to the live site. The public feeds are available at `/api/seo/sitemap.xml` and `/api/seo/rss.xml`.
+
+## Embedded newsroom AI assistant
+
+The administrator dashboard includes an AI research panel. Enter a topic, and the backend uses the OpenAI Responses API with web search to prepare a source-linked article draft. The API key stays on the server. The route is administrator-authenticated and limited to five draft requests per administrator per 15 minutes. The assistant can create drafts only; an editor must review the sources and publish manually. Set `OPENAI_API_KEY` privately and optionally choose `OPENAI_MODEL` in the backend environment. This uses separate OpenAI API billing; a ChatGPT subscription does not include API usage.
 
 ## ChatGPT newsroom integration
 
