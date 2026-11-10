@@ -235,6 +235,7 @@ const updateArticle = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Video URL must be a valid YouTube video link.' });
     }
     if (payload.status === 'published') {
+      payload.scheduledAt = null;
       const existing = await Article.findById(req.params.id).select('publishedAt status');
       if (!existing) {
         return res.status(404).json({ success: false, message: 'Article not found.' });
@@ -243,7 +244,10 @@ const updateArticle = async (req, res) => {
         payload.publishedAt = new Date();
       }
     }
-    if (payload.status === 'draft') payload.publishedAt = null;
+    if (payload.status === 'draft') {
+      payload.publishedAt = null;
+      if (payload.scheduledAt === undefined) payload.scheduledAt = null;
+    }
 
     const article = await Article.findByIdAndUpdate(req.params.id, payload, {
       new: true,
