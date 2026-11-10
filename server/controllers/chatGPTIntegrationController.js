@@ -78,6 +78,7 @@ const createDraftFromChatGPT = async (req, res) => {
       metaDescription: metaDescription || undefined,
       status: 'draft',
       isFeatured: false,
+      homepageOrder: 0,
       publishedAt: null,
     });
 
