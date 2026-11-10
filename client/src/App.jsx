@@ -89,11 +89,11 @@ function PublicSite({ path, navigate }) {
   }, []);
 
   useEffect(() => {
-    try { localStorage.setItem('rwandaTodaySavedStories', JSON.stringify(savedStories)); } catch {}
+    try { localStorage.setItem('rwandaTodaySavedStories', JSON.stringify(savedStories)); } catch { /* Keep the in-memory list if browser storage is disabled. */ }
   }, [savedStories]);
 
   useEffect(() => {
-    try { localStorage.setItem('rwandaTodayReadingHistory', JSON.stringify(readingHistory)); } catch {}
+    try { localStorage.setItem('rwandaTodayReadingHistory', JSON.stringify(readingHistory)); } catch { /* Keep the in-memory history if browser storage is disabled. */ }
   }, [readingHistory]);
 
   useEffect(() => {
@@ -112,7 +112,7 @@ function PublicSite({ path, navigate }) {
           setCategoryList(data.categories.map((item) => item.name));
         }
       })
-      .catch(() => {});
+      .catch(() => { /* Keep the built-in category list if the category API is unavailable. */ });
     return () => { active = false; };
   }, []);
 
@@ -138,12 +138,15 @@ function PublicSite({ path, navigate }) {
     return () => { active = false; };
   }, [category, search, page]);
 
+  const currentArticleSlug = selectedArticle?.slug;
+  const currentArticleId = selectedArticle?._id;
+
   useEffect(() => {
     const identifier = path.startsWith('/article/')
       ? decodeURIComponent(path.slice('/article/'.length))
       : '';
     if (!identifier) return undefined;
-    if (selectedArticle && (selectedArticle.slug === identifier || selectedArticle._id === identifier)) {
+    if (currentArticleSlug === identifier || currentArticleId === identifier) {
       return undefined;
     }
     let active = true;
@@ -159,7 +162,7 @@ function PublicSite({ path, navigate }) {
         if (active) setSelectedArticle(null);
       });
     return () => { active = false; };
-  }, [path, selectedArticle?.slug, selectedArticle?._id, recordReading]);
+  }, [path, currentArticleSlug, currentArticleId, recordReading]);
 
   useEffect(() => {
     let active = true;
