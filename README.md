@@ -70,6 +70,7 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - A backend worker checks for due scheduled stories every 30 seconds and publishes them automatically while the API process is running.
 - Article fields for image URLs and optional YouTube links.
 - Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
+- Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
 - Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 
@@ -88,6 +89,8 @@ Rwanda Today includes a protected endpoint for ChatGPT Actions. You can research
 - The endpoint always creates a draft. An administrator must fact-check it, edit it if needed, and publish it from the dashboard.
 
 The API integration is implemented, but it cannot be used from ChatGPT until a production API domain is deployed, the private token is configured, and the GPT Action is connected.
+
+See `docs/CLOUDINARY-SETUP.md` for signed image-upload configuration.
 
 ## Important security notes
 
