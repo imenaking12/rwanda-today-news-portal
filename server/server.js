@@ -6,6 +6,7 @@ require('dotenv').config();
 const articleRoutes = require('./routes/articleRoutes');
 const authRoutes = require('./routes/authRoutes');
 const chatGPTIntegrationRoutes = require('./routes/chatGPTIntegrationRoutes');
+const { startPublishScheduler } = require('./services/publishScheduler');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,6 +51,7 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('MongoDB connected successfully!');
+    startPublishScheduler();
     app.listen(PORT, () => {
       console.log(`Rwanda Today server running on port ${PORT}`);
     });

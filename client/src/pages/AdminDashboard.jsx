@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react';
 import { apiRequest, clearAdminToken } from '../services/api';
 
+const toLocalDateTime = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
+
 const emptyForm = {
   title: '', excerpt: '', content: '', category: 'Rwanda', author: 'Rwanda Today',
-  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, isBreakingNews: false, metaTitle: '', metaDescription: '', tags: '',
+  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, isBreakingNews: false, metaTitle: '', metaDescription: '', scheduledAt: '', tags: '',
 };
 
 export default function AdminDashboard({ admin, onLogout }) {
@@ -76,6 +83,7 @@ export default function AdminDashboard({ admin, onLogout }) {
       isBreakingNews: Boolean(article.isBreakingNews),
       metaTitle: article.metaTitle || '',
       metaDescription: article.metaDescription || '',
+      scheduledAt: toLocalDateTime(article.scheduledAt),
       tags: (article.tags || []).join(', '),
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -89,6 +97,8 @@ export default function AdminDashboard({ admin, onLogout }) {
     const payload = {
       ...form,
       tags: form.tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+      scheduledAt: form.scheduledAt ? new Date(form.scheduledAt).toISOString() : null,
+      status: form.scheduledAt ? 'draft' : form.status,
     };
     try {
       await apiRequest(editingId ? `/articles/${editingId}` : '/articles', {
@@ -154,7 +164,9 @@ export default function AdminDashboard({ admin, onLogout }) {
             <label>SEO title (optional)<input name="metaTitle" value={form.metaTitle} onChange={updateField} maxLength="70" placeholder="Search result title" /></label>
             <label>SEO description (optional)<textarea name="metaDescription" value={form.metaDescription} onChange={updateField} maxLength="180" rows="2" placeholder="Short description for search engines" /></label>
             <label>Tags (comma separated)<input name="tags" value={form.tags} onChange={updateField} placeholder="Kigali, Rwanda, News" /></label>
-            <label>Publishing status<select name="status" value={form.status} onChange={updateField}><option value="draft">Save as draft</option><option value="published">Publish now</option></select></label>
+            <label>Publishing status<select name="status" value={form.scheduledAt ? 'draft' : form.status} onChange={updateField} disabled={Boolean(form.scheduledAt)}><option value="draft">Save as draft</option><option value="published">Publish now</option></select></label>
+            <label className="full-field">Schedule publication (optional)<input type="datetime-local" name="scheduledAt" value={form.scheduledAt} min={toLocalDateTime(new Date())} onChange={updateField} /></label>
+            <p className="muted full-field">A scheduled story stays private as a draft until its selected time. The backend must be running to publish it automatically.</p>
             <label className="checkbox-label"><input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={updateField} /> Feature on homepage</label>
             <label className="checkbox-label"><input type="checkbox" name="isBreakingNews" checked={form.isBreakingNews} onChange={updateField} /> Show in breaking-news ticker</label>
             <div className="form-actions full-field"><button className="primary-button" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Update article' : 'Save article'}</button></div>
@@ -175,7 +187,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <div className="admin-article-list">
               {articles.map((article) => (
                 <article className="admin-article-row" key={article._id}>
-                  <div><span className={`status-pill ${article.status}`}>{article.status}</span>{article.isBreakingNews && <span className="breaking-admin-badge">BREAKING</span>}<h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p>{article.sources?.length > 0 && <p className="source-list">Research sources: {article.sources.map((source, index) => <a key={source.url + index} href={source.url} target="_blank" rel="noreferrer">{source.title}</a>)}</p>}</div>
+                  <div><span className={`status-pill ${article.status}`}>{article.status}</span>{article.isBreakingNews && <span className="breaking-admin-badge">BREAKING</span>}<h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p>{article.scheduledAt && article.status === 'draft' && <p className="scheduled-label">Scheduled for {new Date(article.scheduledAt).toLocaleString()}</p>}{article.sources?.length > 0 && <p className="source-list">Research sources: {article.sources.map((source, index) => <a key={source.url + index} href={source.url} target="_blank" rel="noreferrer">{source.title}</a>)}</p>}</div>
                   <div className="row-actions"><button className="outline-button" onClick={() => editArticle(article)}>Edit</button><button className="danger-button" onClick={() => deleteArticle(article._id)}>Delete</button></div>
                 </article>
               ))}

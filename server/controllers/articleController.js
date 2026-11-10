@@ -104,7 +104,7 @@ const getArticleById = async (req, res) => {
 
 const allowedFields = [
   'title', 'excerpt', 'content', 'category', 'author',
-  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'isBreakingNews', 'tags', 'metaTitle', 'metaDescription',
+  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'isBreakingNews', 'tags', 'metaTitle', 'metaDescription', 'scheduledAt',
 ];
 
 const validateArticle = (data) => {
@@ -125,6 +125,12 @@ const validateArticle = (data) => {
   }
   if (!['draft', 'published'].includes(data.status || 'draft')) {
     return 'Status must be draft or published.';
+  }
+  if (data.scheduledAt !== undefined && data.scheduledAt !== null && data.scheduledAt !== '') {
+    const scheduledDate = new Date(data.scheduledAt);
+    if (Number.isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
+      return 'Scheduled publication time must be a valid future date and time.';
+    }
   }
   if (data.metaTitle !== undefined && (typeof data.metaTitle !== 'string' || data.metaTitle.length > 70)) {
     return 'SEO title must be text no longer than 70 characters.';
@@ -167,7 +173,17 @@ const createArticle = async (req, res) => {
     if (validationError) {
       return res.status(400).json({ success: false, message: validationError });
     }
-    if (payload.status === 'published') payload.publishedAt = new Date();
+    if (payload.scheduledAt) {
+      payload.scheduledAt = new Date(payload.scheduledAt);
+      payload.status = 'draft';
+      payload.publishedAt = null;
+    } else if (payload.status === 'published') {
+      payload.scheduledAt = null;
+      payload.publishedAt = new Date();
+    } else {
+      payload.scheduledAt = null;
+      payload.publishedAt = null;
+    }
     const article = await Article.create(payload);
     res.status(201).json({ success: true, message: 'Article created.', article });
   } catch (error) {
@@ -189,6 +205,17 @@ const updateArticle = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No article changes were provided.' });
     }
 
+    if (payload.scheduledAt !== undefined && payload.scheduledAt !== null && payload.scheduledAt !== '') {
+      const scheduledDate = new Date(payload.scheduledAt);
+      if (Number.isNaN(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now()) {
+        return res.status(400).json({ success: false, message: 'Scheduled publication time must be a valid future date and time.' });
+      }
+      payload.scheduledAt = scheduledDate;
+      payload.status = 'draft';
+      payload.publishedAt = null;
+    } else if (payload.scheduledAt === null || payload.scheduledAt === '') {
+      payload.scheduledAt = null;
+    }
     if (payload.metaTitle !== undefined && (typeof payload.metaTitle !== 'string' || payload.metaTitle.length > 70)) {
       return res.status(400).json({ success: false, message: 'SEO title must be text no longer than 70 characters.' });
     }
@@ -208,6 +235,7 @@ const updateArticle = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Video URL must be a valid YouTube video link.' });
     }
     if (payload.status === 'published') {
+      payload.scheduledAt = null;
       const existing = await Article.findById(req.params.id).select('publishedAt status');
       if (!existing) {
         return res.status(404).json({ success: false, message: 'Article not found.' });
@@ -216,7 +244,10 @@ const updateArticle = async (req, res) => {
         payload.publishedAt = new Date();
       }
     }
-    if (payload.status === 'draft') payload.publishedAt = null;
+    if (payload.status === 'draft') {
+      payload.publishedAt = null;
+      if (payload.scheduledAt === undefined) payload.scheduledAt = null;
+    }
 
     const article = await Article.findByIdAndUpdate(req.params.id, payload, {
       new: true,

@@ -30,6 +30,7 @@ const articleSchema = new mongoose.Schema(
       default: [],
     },
     publishedAt: { type: Date, default: null },
+    scheduledAt: { type: Date, default: null, index: true },
   },
   { timestamps: true }
 );
