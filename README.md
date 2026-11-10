@@ -66,7 +66,7 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - SEO-friendly article slugs, shareable article URLs and editable search metadata.
 - Featured-story ordering, admin-managed breaking-news ticker and article detail reading view.
 - Administrator sign-in with hashed passwords and signed, expiring bearer tokens.
-- Protected article creation, editing, publishing, draft saving and deletion.
+- Protected article creation, editing, immediate publishing, scheduled publishing, draft saving and deletion.
 - Article fields for image URLs and optional YouTube links.
 - Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
