@@ -3,7 +3,7 @@ import { apiRequest, clearAdminToken } from '../services/api';
 
 const emptyForm = {
   title: '', excerpt: '', content: '', category: 'Rwanda', author: 'Rwanda Today',
-  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, isBreakingNews: false, tags: '',
+  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, isBreakingNews: false, metaTitle: '', metaDescription: '', tags: '',
 };
 
 export default function AdminDashboard({ admin, onLogout }) {
@@ -74,6 +74,8 @@ export default function AdminDashboard({ admin, onLogout }) {
       status: article.status || 'draft',
       isFeatured: Boolean(article.isFeatured),
       isBreakingNews: Boolean(article.isBreakingNews),
+      metaTitle: article.metaTitle || '',
+      metaDescription: article.metaDescription || '',
       tags: (article.tags || []).join(', '),
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -149,6 +151,8 @@ export default function AdminDashboard({ admin, onLogout }) {
             <label>Author<input name="author" value={form.author} onChange={updateField} /></label>
             <label className="full-field">Featured image URL<input type="url" name="featuredImage" value={form.featuredImage} onChange={updateField} placeholder="https://…" /></label>
             <label className="full-field">YouTube video URL (optional)<input type="url" name="videoUrl" value={form.videoUrl} onChange={updateField} placeholder="https://www.youtube.com/watch?v=…" /></label>
+            <label>SEO title (optional)<input name="metaTitle" value={form.metaTitle} onChange={updateField} maxLength="70" placeholder="Search result title" /></label>
+            <label>SEO description (optional)<textarea name="metaDescription" value={form.metaDescription} onChange={updateField} maxLength="180" rows="2" placeholder="Short description for search engines" /></label>
             <label>Tags (comma separated)<input name="tags" value={form.tags} onChange={updateField} placeholder="Kigali, Rwanda, News" /></label>
             <label>Publishing status<select name="status" value={form.status} onChange={updateField}><option value="draft">Save as draft</option><option value="published">Publish now</option></select></label>
             <label className="checkbox-label"><input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={updateField} /> Feature on homepage</label>
