@@ -30,7 +30,25 @@ export default function AdminDashboard({ admin, onLogout }) {
     }
   };
 
-  useEffect(() => { loadArticles(); }, []);
+  useEffect(() => {
+    let active = true;
+    apiRequest('/articles/admin/all')
+      .then((data) => {
+        if (active) setArticles(data.articles || []);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message);
+        if (err.message.toLowerCase().includes('session') || err.message.toLowerCase().includes('authentication')) {
+          clearAdminToken();
+          onLogout();
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [onLogout]);
 
   const updateField = (event) => {
     const { name, value, checked, type } = event.target;
