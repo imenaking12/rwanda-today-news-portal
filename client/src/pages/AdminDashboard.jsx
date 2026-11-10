@@ -15,6 +15,8 @@ const emptyForm = {
 
 export default function AdminDashboard({ admin, onLogout }) {
   const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,47 @@ export default function AdminDashboard({ admin, onLogout }) {
       });
     return () => { active = false; };
   }, [onLogout]);
+
+  useEffect(() => {
+    let active = true;
+    apiRequest('/categories/admin/all')
+      .then((data) => {
+        if (active) setCategories(data.categories || []);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const createCategory = async (event) => {
+    event.preventDefault();
+    const name = newCategoryName.trim();
+    if (!name) return;
+    try {
+      await apiRequest('/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      });
+      setNewCategoryName('');
+      setMessage('Category created.');
+      const data = await apiRequest('/categories/admin/all');
+      setCategories(data.categories || []);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const toggleCategory = async (category) => {
+    try {
+      await apiRequest(`/categories/${category._id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isActive: !category.isActive }),
+      });
+      const data = await apiRequest('/categories/admin/all');
+      setCategories(data.categories || []);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const updateField = (event) => {
     const { name, value, checked, type } = event.target;
@@ -157,7 +200,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <label>Headline<input name="title" value={form.title} onChange={updateField} required maxLength="180" /></label>
             <label>Short summary<textarea name="excerpt" value={form.excerpt} onChange={updateField} required rows="2" maxLength="320" /></label>
             <label className="full-field">Article content<textarea name="content" value={form.content} onChange={updateField} required rows="10" /></label>
-            <label>Category<select name="category" value={form.category} onChange={updateField}>{['Rwanda', 'Politics', 'Business', 'Sports', 'Entertainment', 'Technology', 'World', 'Opinion'].map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label>Category<select name="category" value={form.category} onChange={updateField}>{[...new Set([form.category, ...categories.filter((item) => item.isActive).map((item) => item.name)])].map((item) => <option key={item}>{item}</option>)}</select></label>
             <label>Author<input name="author" value={form.author} onChange={updateField} /></label>
             <label className="full-field">Featured image URL<input type="url" name="featuredImage" value={form.featuredImage} onChange={updateField} placeholder="https://…" /></label>
             <label className="full-field">YouTube video URL (optional)<input type="url" name="videoUrl" value={form.videoUrl} onChange={updateField} placeholder="https://www.youtube.com/watch?v=…" /></label>
@@ -179,6 +222,20 @@ export default function AdminDashboard({ admin, onLogout }) {
             {form.featuredImage && <img src={form.featuredImage} alt="Article preview" />}
             <div className="preview-content">{form.content ? form.content.split('\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>) : <p>Your article text will appear here.</p>}</div>
           </section>}
+        </section>
+
+        <section className="category-manager-panel">
+          <div className="panel-heading"><h2>Manage news categories</h2></div>
+          <form className="category-create-form" onSubmit={createCategory}>
+            <input value={newCategoryName} onChange={(event) => setNewCategoryName(event.target.value)} placeholder="New category name" maxLength="50" aria-label="New category name" />
+            <button className="primary-button" type="submit">Add category</button>
+          </form>
+          <div className="category-manager-list">
+            {categories.map((item) => <div className="category-manager-row" key={item._id}>
+              <span>{item.name}</span><span className={item.isActive ? 'category-active' : 'category-inactive'}>{item.isActive ? 'Active' : 'Hidden'}</span>
+              <button type="button" className="text-button" onClick={() => toggleCategory(item)}>{item.isActive ? 'Deactivate' : 'Activate'}</button>
+            </div>)}
+          </div>
         </section>
 
         <section className="article-list-panel">
