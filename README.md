@@ -70,6 +70,8 @@ Rwanda Today includes a protected endpoint for ChatGPT Actions. You can research
 
 - API endpoint: `POST /api/integrations/chatgpt/articles/drafts`
 - OpenAPI contract: `docs/chatgpt-actions-openapi.yaml`
+- Assistant behavior and setup guide: `docs/CHATGPT-EDITORIAL-ASSISTANT.md`
+- Research source references are stored with the draft and displayed to editors and readers.
 - Authentication: a private bearer token configured as `CHATGPT_INTEGRATION_TOKEN` on the server.
 - Configure the deployed API URL and bearer-token authentication in a ChatGPT GPT Action using the OpenAPI contract.
 - Replace the placeholder server URL in the OpenAPI file with the real deployed API URL.
