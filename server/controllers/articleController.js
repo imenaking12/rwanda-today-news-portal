@@ -84,6 +84,32 @@ const getArticleBySlug = async (req, res) => {
   }
 };
 
+const getRelatedArticles = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid article ID.' });
+    }
+    const currentArticle = await Article.findOne({
+      _id: req.params.id,
+      status: 'published',
+    }).select('_id category');
+    if (!currentArticle) {
+      return res.status(404).json({ success: false, message: 'Article not found.' });
+    }
+    const articles = await Article.find({
+      status: 'published',
+      category: currentArticle.category,
+      _id: { $ne: currentArticle._id },
+    })
+      .sort({ isFeatured: -1, publishedAt: -1 })
+      .limit(3)
+      .lean();
+    res.status(200).json({ success: true, articles });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Unable to load related stories.' });
+  }
+};
+
 const getArticleById = async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -290,6 +316,7 @@ module.exports = {
   getArticles,
   getBreakingNews,
   getArticleBySlug,
+  getRelatedArticles,
   getArticleById,
   getAdminArticles,
   createArticle,

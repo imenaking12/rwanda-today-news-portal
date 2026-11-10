@@ -23,7 +23,8 @@
 - [ ] Homepage story ordering
 - [x] Article SEO titles/descriptions and unique readable slugs
 - [x] Public article detail routes using slugs
-- [ ] Social sharing and related stories
+- [x] Story sharing with Web Share API and clipboard fallback
+- [x] Related stories from the same news category
 - [x] Server-side category filtering and search
 - [x] Paginated public article feed
 
@@ -39,7 +40,8 @@
 ## Phase 4: Reader experience
 - [x] Responsive article URLs using SEO-friendly slugs
 - [ ] Responsive category pages
-- [ ] Related stories, bookmarks and reading history
+- [x] Related stories
+- [ ] Bookmarks and reading history
 - [ ] Newsletter subscriptions
 - [ ] About, contact, corrections, privacy and editorial policy pages
 - [ ] Accessibility, metadata, sitemap and performance improvements
