@@ -139,6 +139,10 @@ function PublicSite({ path, navigate }) {
     if (openGraphTitle) openGraphTitle.setAttribute('content', selectedArticle?.title || defaultTitle);
     const openGraphDescription = document.querySelector('meta[property="og:description"]');
     if (openGraphDescription) openGraphDescription.setAttribute('content', description);
+    const openGraphType = document.querySelector('meta[property="og:type"]');
+    if (openGraphType) openGraphType.setAttribute('content', selectedArticle ? 'article' : 'website');
+    const openGraphUrl = document.querySelector('meta[property="og:url"]');
+    if (openGraphUrl) openGraphUrl.setAttribute('content', window.location.href);
   }, [selectedArticle]);
 
   const featured = articles.find((article) => article.isFeatured) || articles[0];
