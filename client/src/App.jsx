@@ -44,7 +44,7 @@ const getYouTubeEmbedUrl = (value) => {
   } catch { return ''; }
 };
 
-function PublicSite() {
+function PublicSite({ path, navigate }) {
   const [articles, setArticles] = useState([]);
   const [breakingNews, setBreakingNews] = useState([]);
   const [category, setCategory] = useState('Home');
@@ -54,6 +54,14 @@ function PublicSite() {
   const [apiError, setApiError] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 1 });
+
+  useEffect(() => {
+    const onPopState = () => {
+      if (!window.location.pathname.startsWith('/article/')) setSelectedArticle(null);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -78,6 +86,26 @@ function PublicSite() {
   }, [category, search, page]);
 
   useEffect(() => {
+    const identifier = path.startsWith('/article/')
+      ? decodeURIComponent(path.slice('/article/'.length))
+      : '';
+    if (!identifier) return undefined;
+    if (selectedArticle && (selectedArticle.slug === identifier || selectedArticle._id === identifier)) {
+      return undefined;
+    }
+    let active = true;
+    const isObjectId = /^[a-f0-9]{24}$/i.test(identifier);
+    apiRequest(isObjectId ? `/articles/${identifier}` : `/articles/slug/${encodeURIComponent(identifier)}`)
+      .then((data) => {
+        if (active) setSelectedArticle(data.article);
+      })
+      .catch(() => {
+        if (active) setSelectedArticle(null);
+      });
+    return () => { active = false; };
+  }, [path, selectedArticle?.slug, selectedArticle?._id]);
+
+  useEffect(() => {
     let active = true;
     apiRequest('/articles/breaking')
       .then((data) => {
@@ -89,15 +117,43 @@ function PublicSite() {
     return () => { active = false; };
   }, []);
 
+  const openArticle = (article) => {
+    setSelectedArticle(article);
+    navigate(`/article/${article.slug || article._id}`);
+  };
+  const closeArticle = () => {
+    setSelectedArticle(null);
+    navigate('/');
+  };
+
+  useEffect(() => {
+    const defaultTitle = 'Rwanda Today | The Stories That Matter';
+    document.title = selectedArticle
+      ? `${selectedArticle.metaTitle || selectedArticle.title} | Rwanda Today`
+      : defaultTitle;
+    const description = selectedArticle?.metaDescription || selectedArticle?.excerpt ||
+      'Independent reporting, news, context and perspective from Rwanda and around the world.';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', description);
+    const openGraphTitle = document.querySelector('meta[property="og:title"]');
+    if (openGraphTitle) openGraphTitle.setAttribute('content', selectedArticle?.title || defaultTitle);
+    const openGraphDescription = document.querySelector('meta[property="og:description"]');
+    if (openGraphDescription) openGraphDescription.setAttribute('content', description);
+    const openGraphType = document.querySelector('meta[property="og:type"]');
+    if (openGraphType) openGraphType.setAttribute('content', selectedArticle ? 'article' : 'website');
+    const openGraphUrl = document.querySelector('meta[property="og:url"]');
+    if (openGraphUrl) openGraphUrl.setAttribute('content', window.location.href);
+  }, [selectedArticle]);
+
   const featured = articles.find((article) => article.isFeatured) || articles[0];
   const remaining = articles.filter((article) => article._id !== featured?._id);
 
   if (selectedArticle) {
     return (
       <div className="site-shell">
-        <header className="site-header"><a className="masthead" href="/" onClick={(e) => { e.preventDefault(); setSelectedArticle(null); }}>RWANDA <span>TODAY</span></a><p className="masthead-tagline">THE STORIES THAT MATTER</p></header>
+        <header className="site-header"><a className="masthead" href="/" onClick={(e) => { e.preventDefault(); closeArticle(); }}>RWANDA <span>TODAY</span></a><p className="masthead-tagline">THE STORIES THAT MATTER</p></header>
         <main className="article-detail">
-          <button className="back-link" onClick={() => setSelectedArticle(null)}>← Back to headlines</button>
+          <button className="back-link" onClick={closeArticle}>← Back to headlines</button>
           <span className="category-label">{selectedArticle.category}</span>
           <h1>{selectedArticle.title}</h1>
           <p className="article-deck">{selectedArticle.excerpt}</p>
@@ -124,7 +180,7 @@ function PublicSite() {
         </nav>
       </header>
 
-      <div className="breaking-strip"><strong>BREAKING NEWS</strong>{breakingNews.length > 0 ? <div className="breaking-headlines">{breakingNews.map((story) => <button key={story._id} onClick={() => setSelectedArticle(story)}>{story.title}</button>)}</div> : <span>Independent reporting from Rwanda and around the world.</span>}</div>
+      <div className="breaking-strip"><strong>BREAKING NEWS</strong>{breakingNews.length > 0 ? <div className="breaking-headlines">{breakingNews.map((story) => <button key={story._id} onClick={() => openArticle(story)}>{story.title}</button>)}</div> : <span>Independent reporting from Rwanda and around the world.</span>}</div>
 
       <main className="home-content">
         <div className="section-title">
@@ -137,8 +193,8 @@ function PublicSite() {
           <div className="empty-news"><span className="eyebrow">THE NEWSROOM</span><h2>{search ? 'No matching stories found' : 'Your next headline starts here.'}</h2><p>{search ? 'Try another search term or choose a different category.' : 'Published articles from the editorial dashboard will appear here.'}</p></div>
         ) : (
           <>
-            {featured && <section className="lead-story-section"><ArticleCard article={featured} onOpen={setSelectedArticle} featured /></section>}
-            {remaining.length > 0 && <section className="latest-section"><div className="section-title compact"><div><span className="eyebrow">FRESH FROM THE NEWSROOM</span><h2>Latest stories</h2></div><span className="article-count">{pagination.total} stories</span></div><div className="news-grid">{remaining.map((article) => <ArticleCard key={article._id} article={article} onOpen={setSelectedArticle} />)}</div></section>}
+            {featured && <section className="lead-story-section"><ArticleCard article={featured} onOpen={openArticle} featured /></section>}
+            {remaining.length > 0 && <section className="latest-section"><div className="section-title compact"><div><span className="eyebrow">FRESH FROM THE NEWSROOM</span><h2>Latest stories</h2></div><span className="article-count">{pagination.total} stories</span></div><div className="news-grid">{remaining.map((article) => <ArticleCard key={article._id} article={article} onOpen={openArticle} />)}</div></section>}
             <nav className="pagination" aria-label="Article pages">
               <button className="outline-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1 || loading}>← Previous</button>
               <span>Page {pagination.page || page} of {pagination.totalPages || 1}</span>
@@ -183,5 +239,5 @@ export default function App() {
     return <AdminDashboard admin={admin} onLogout={() => { setAdmin(null); navigate('/admin/login'); }} />;
   }
 
-  return <PublicSite />;
+  return <PublicSite path={path} navigate={navigate} />;
 }

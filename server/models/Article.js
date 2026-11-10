@@ -1,8 +1,12 @@
 const mongoose = require('mongoose');
+const { slugify } = require('../utils/slug');
 
 const articleSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 180 },
+    slug: { type: String, unique: true, sparse: true },
+    metaTitle: { type: String, trim: true, maxlength: 70 },
+    metaDescription: { type: String, trim: true, maxlength: 180 },
     excerpt: { type: String, required: true, trim: true, maxlength: 320 },
     content: { type: String, required: true, maxlength: 100000 },
     category: { type: String, required: true, trim: true, maxlength: 60 },
@@ -29,6 +33,15 @@ const articleSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+articleSchema.pre('validate', function () {
+  if (!this.slug && this.title) {
+    const base = slugify(this.title) || 'story';
+    this.slug = `${base}-${this._id.toString().slice(-6)}`;
+  }
+  if (!this.metaTitle && this.title) this.metaTitle = this.title.slice(0, 70);
+  if (!this.metaDescription && this.excerpt) this.metaDescription = this.excerpt.slice(0, 180);
+});
 
 articleSchema.index({ status: 1, isFeatured: -1, publishedAt: -1, createdAt: -1 });
 articleSchema.index({ status: 1, category: 1, publishedAt: -1 });
