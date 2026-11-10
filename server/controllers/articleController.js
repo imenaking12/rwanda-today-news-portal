@@ -57,6 +57,18 @@ const getArticles = async (req, res) => {
   }
 };
 
+const getBreakingNews = async (req, res) => {
+  try {
+    const articles = await Article.find({ status: 'published', isBreakingNews: true })
+      .sort({ publishedAt: -1, createdAt: -1 })
+      .limit(5)
+      .lean();
+    res.status(200).json({ success: true, articles });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Unable to load breaking news.' });
+  }
+};
+
 const getArticleById = async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -77,7 +89,7 @@ const getArticleById = async (req, res) => {
 
 const allowedFields = [
   'title', 'excerpt', 'content', 'category', 'author',
-  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'tags',
+  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'isBreakingNews', 'tags',
 ];
 
 const validateArticle = (data) => {
@@ -98,6 +110,9 @@ const validateArticle = (data) => {
   }
   if (!['draft', 'published'].includes(data.status || 'draft')) {
     return 'Status must be draft or published.';
+  }
+  if (data.isBreakingNews !== undefined && typeof data.isBreakingNews !== 'boolean') {
+    return 'Breaking-news selection must be true or false.';
   }
   if (data.tags !== undefined && (!Array.isArray(data.tags) || data.tags.some((tag) => typeof tag !== 'string'))) {
     return 'Tags must be an array of strings.';
@@ -153,6 +168,9 @@ const updateArticle = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No article changes were provided.' });
     }
 
+    if (payload.isBreakingNews !== undefined && typeof payload.isBreakingNews !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'Breaking-news selection must be true or false.' });
+    }
     if (payload.status && !['draft', 'published'].includes(payload.status)) {
       return res.status(400).json({ success: false, message: 'Status must be draft or published.' });
     }
@@ -212,6 +230,7 @@ const getAdminArticles = async (req, res) => {
 
 module.exports = {
   getArticles,
+  getBreakingNews,
   getArticleById,
   getAdminArticles,
   createArticle,
