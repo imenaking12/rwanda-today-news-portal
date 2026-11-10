@@ -4,7 +4,7 @@ const { slugify } = require('../utils/slug');
 const articleSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 180 },
-    slug: { type: String, unique: true, sparse: true, index: true },
+    slug: { type: String, unique: true, sparse: true },
     metaTitle: { type: String, trim: true, maxlength: 70 },
     metaDescription: { type: String, trim: true, maxlength: 180 },
     excerpt: { type: String, required: true, trim: true, maxlength: 320 },
