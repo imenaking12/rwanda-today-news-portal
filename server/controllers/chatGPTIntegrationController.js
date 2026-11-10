@@ -49,7 +49,7 @@ const createDraftFromChatGPT = async (req, res) => {
       sources.length > 20 ||
       sources.some((source) => !source || typeof source.title !== 'string' ||
         source.title.trim().length === 0 || source.title.length > 180 ||
-        !isHttpUrl(source.url))
+        (!isHttpUrl(source.url) || source.url.length > 2048))
     )) {
       return res.status(400).json({ success: false, message: 'sources must contain up to 20 entries with a title and valid HTTP or HTTPS URL.' });
     }
