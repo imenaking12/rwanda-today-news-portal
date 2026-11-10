@@ -4,7 +4,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import { apiRequest, clearAdminToken, getStoredToken } from './services/api';
 
-const categories = ['Home', 'Rwanda', 'Politics', 'Business', 'Sports', 'Entertainment', 'Technology', 'World', 'Opinion'];
+const defaultCategories = ['Rwanda', 'Politics', 'Business', 'Sports', 'Entertainment', 'Technology', 'World', 'Opinion'];
 const PAGE_SIZE = 9;
 
 const formatDate = (value) => {
@@ -46,6 +46,7 @@ const getYouTubeEmbedUrl = (value) => {
 
 function PublicSite({ path, navigate }) {
   const [articles, setArticles] = useState([]);
+  const [categoryList, setCategoryList] = useState(defaultCategories);
   const [breakingNews, setBreakingNews] = useState([]);
   const [category, setCategory] = useState('Home');
   const [search, setSearch] = useState('');
@@ -63,6 +64,18 @@ function PublicSite({ path, navigate }) {
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    apiRequest('/categories')
+      .then((data) => {
+        if (active && Array.isArray(data.categories) && data.categories.length) {
+          setCategoryList(data.categories.map((item) => item.name));
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -215,7 +228,7 @@ function PublicSite({ path, navigate }) {
         <a className="masthead" href="/">RWANDA <span>TODAY</span></a>
         <p className="masthead-tagline">THE STORIES THAT MATTER</p>
         <nav className="category-nav" aria-label="News categories">
-          {categories.map((item) => <button className={category === item ? 'active' : ''} key={item} onClick={() => { setCategory(item); setPage(1); }}>{item}</button>)}
+          {['Home', ...categoryList].map((item) => <button className={category === item ? 'active' : ''} key={item} onClick={() => { setCategory(item); setPage(1); }}>{item}</button>)}
         </nav>
       </header>
 
