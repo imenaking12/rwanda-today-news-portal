@@ -29,8 +29,9 @@
 - [x] Paginated public article feed
 
 ## Phase 3: Media
-- [ ] Cloudinary account and server-side upload integration (requires your Cloudinary account)
-- [ ] Image and video upload validation
+- [x] Protected Cloudinary signed image upload integration (requires your Cloudinary credentials to activate)
+- [x] Browser-side image type and 10 MB size validation
+- [ ] Video upload validation
 - [ ] Media library with reusable assets
 - [x] Embedded YouTube player with URL validation
 - [x] Backend unit tests for supported and rejected YouTube URL formats

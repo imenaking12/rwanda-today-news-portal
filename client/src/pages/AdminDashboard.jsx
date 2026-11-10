@@ -24,6 +24,7 @@ export default function AdminDashboard({ admin, onLogout }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const loadArticles = async () => {
     try {
@@ -98,6 +99,52 @@ export default function AdminDashboard({ admin, onLogout }) {
       setCategories(data.categories || []);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const uploadImage = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Choose a JPG, PNG, WEBP or GIF image.');
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Images must be 10 MB or smaller.');
+      event.target.value = '';
+      return;
+    }
+
+    setUploadingImage(true);
+    setError('');
+    setMessage('');
+    try {
+      const config = await apiRequest('/media/signature', { method: 'POST' });
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+      uploadData.append('api_key', config.apiKey);
+      uploadData.append('timestamp', String(config.timestamp));
+      uploadData.append('signature', config.signature);
+      uploadData.append('upload_preset', config.uploadPreset);
+      uploadData.append('folder', config.folder);
+
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`, {
+        method: 'POST',
+        body: uploadData,
+      });
+      const result = await response.json();
+      if (!response.ok || !result.secure_url) {
+        throw new Error(result.error?.message || 'Cloudinary could not upload this image.');
+      }
+      setForm((current) => ({ ...current, featuredImage: result.secure_url }));
+      setMessage('Image uploaded. Its secure URL has been added to this article.');
+    } catch (err) {
+      setError(err.message || 'Image upload failed.');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
     }
   };
 
@@ -202,6 +249,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <label className="full-field">Article content<textarea name="content" value={form.content} onChange={updateField} required rows="10" /></label>
             <label>Category<select name="category" value={form.category} onChange={updateField}>{[...new Set([form.category, ...categories.filter((item) => item.isActive).map((item) => item.name)])].map((item) => <option key={item}>{item}</option>)}</select></label>
             <label>Author<input name="author" value={form.author} onChange={updateField} /></label>
+            <label className="full-field">Upload featured image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={uploadImage} disabled={uploadingImage} />{uploadingImage ? 'Uploading image…' : 'JPG, PNG, WEBP or GIF · maximum 10 MB'}</label>
             <label className="full-field">Featured image URL<input type="url" name="featuredImage" value={form.featuredImage} onChange={updateField} placeholder="https://…" /></label>
             <label className="full-field">YouTube video URL (optional)<input type="url" name="videoUrl" value={form.videoUrl} onChange={updateField} placeholder="https://www.youtube.com/watch?v=…" /></label>
             <label>SEO title (optional)<input name="metaTitle" value={form.metaTitle} onChange={updateField} maxLength="70" placeholder="Search result title" /></label>

@@ -69,6 +69,8 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - Protected article creation, editing, immediate publishing, scheduled publishing, draft saving and deletion.
 - A backend worker checks for due scheduled stories every 30 seconds and publishes them automatically while the API process is running.
 - Article fields for image URLs and optional YouTube links.
+- Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
+- Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
 - Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 
@@ -88,12 +90,14 @@ Rwanda Today includes a protected endpoint for ChatGPT Actions. You can research
 
 The API integration is implemented, but it cannot be used from ChatGPT until a production API domain is deployed, the private token is configured, and the GPT Action is connected.
 
+See `docs/CLOUDINARY-SETUP.md` for signed image-upload configuration.
+
 ## Important security notes
 
 - Keep server credentials in `server/.env`; never paste them into chat or commit them.
 - The first administrator is created with the local one-time seed script, not a public registration endpoint.
 - The current admin token is stored in browser session storage and expires after eight hours. The API now adds baseline security headers and a basic in-memory login rate limit (10 requests per IP per 15 minutes). Before a multi-instance production launch, move to secure HttpOnly cookies with CSRF protection and use a shared rate-limit store such as Redis.
-- Media URLs are supported now. Direct Cloudinary uploads and media-library management still require a Cloudinary account and server-side configuration.
+- Signed Cloudinary uploads are implemented. Add the Cloudinary environment values from `.env.example` to activate them; media-library management and video uploads remain future work.
 - Test all changes locally before treating a release as production-ready.
 
 ## Automated checks
