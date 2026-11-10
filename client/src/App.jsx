@@ -26,6 +26,24 @@ function ArticleCard({ article, onOpen, featured = false }) {
   );
 }
 
+const getYouTubeEmbedUrl = (value) => {
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    if (!['https:', 'http:'].includes(url.protocol)) return '';
+    const host = url.hostname.toLowerCase();
+    const allowedHosts = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be', 'youtube-nocookie.com', 'www.youtube-nocookie.com'];
+    if (!allowedHosts.includes(host)) return '';
+    const parts = url.pathname.split('/').filter(Boolean);
+    let videoId = '';
+    if (host === 'youtu.be') videoId = parts[0] || '';
+    else if (url.pathname === '/watch') videoId = url.searchParams.get('v') || '';
+    else if (['embed', 'shorts', 'live', 'v'].includes(parts[0])) videoId = parts[1] || '';
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return '';
+    return 'https://www.youtube-nocookie.com/embed/' + videoId;
+  } catch { return ''; }
+};
+
 function PublicSite() {
   const [articles, setArticles] = useState([]);
   const [category, setCategory] = useState('Home');
@@ -74,7 +92,7 @@ function PublicSite() {
           <p className="article-deck">{selectedArticle.excerpt}</p>
           <p className="story-meta">By {selectedArticle.author || 'Rwanda Today'} · {formatDate(selectedArticle.publishedAt)}</p>
           {selectedArticle.featuredImage && <img className="article-hero-image" src={selectedArticle.featuredImage} alt="" />}
-          {selectedArticle.videoUrl && <a className="video-link" href={selectedArticle.videoUrl} target="_blank" rel="noreferrer">Watch related video on YouTube ↗</a>}
+          {getYouTubeEmbedUrl(selectedArticle.videoUrl) && <section className="article-video"><h2>Watch the video</h2><div className="video-frame"><iframe src={getYouTubeEmbedUrl(selectedArticle.videoUrl)} title={'YouTube video: ' + selectedArticle.title} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div></section>}
           <div className="article-content">{selectedArticle.content.split('\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
           <div className="article-tags">{(selectedArticle.tags || []).map((tag) => <span key={tag}>#{tag}</span>)}</div>
         </main>
