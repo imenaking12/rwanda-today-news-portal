@@ -3,7 +3,7 @@ import { apiRequest, clearAdminToken } from '../services/api';
 
 const emptyForm = {
   title: '', excerpt: '', content: '', category: 'Rwanda', author: 'Rwanda Today',
-  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, tags: '',
+  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, isBreakingNews: false, tags: '',
 };
 
 export default function AdminDashboard({ admin, onLogout }) {
@@ -73,6 +73,7 @@ export default function AdminDashboard({ admin, onLogout }) {
       videoUrl: article.videoUrl || '',
       status: article.status || 'draft',
       isFeatured: Boolean(article.isFeatured),
+      isBreakingNews: Boolean(article.isBreakingNews),
       tags: (article.tags || []).join(', '),
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -151,6 +152,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <label>Tags (comma separated)<input name="tags" value={form.tags} onChange={updateField} placeholder="Kigali, Rwanda, News" /></label>
             <label>Publishing status<select name="status" value={form.status} onChange={updateField}><option value="draft">Save as draft</option><option value="published">Publish now</option></select></label>
             <label className="checkbox-label"><input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={updateField} /> Feature on homepage</label>
+            <label className="checkbox-label"><input type="checkbox" name="isBreakingNews" checked={form.isBreakingNews} onChange={updateField} /> Show in breaking-news ticker</label>
             <div className="form-actions full-field"><button className="primary-button" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Update article' : 'Save article'}</button></div>
           </form>
           {previewOpen && <section className="draft-preview" aria-label="Article preview">
@@ -169,7 +171,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <div className="admin-article-list">
               {articles.map((article) => (
                 <article className="admin-article-row" key={article._id}>
-                  <div><span className={`status-pill ${article.status}`}>{article.status}</span><h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p>{article.sources?.length > 0 && <p className="source-list">Research sources: {article.sources.map((source, index) => <a key={source.url + index} href={source.url} target="_blank" rel="noreferrer">{source.title}</a>)}</p>}</div>
+                  <div><span className={`status-pill ${article.status}`}>{article.status}</span>{article.isBreakingNews && <span className="breaking-admin-badge">BREAKING</span>}<h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p>{article.sources?.length > 0 && <p className="source-list">Research sources: {article.sources.map((source, index) => <a key={source.url + index} href={source.url} target="_blank" rel="noreferrer">{source.title}</a>)}</p>}</div>
                   <div className="row-actions"><button className="outline-button" onClick={() => editArticle(article)}>Edit</button><button className="danger-button" onClick={() => deleteArticle(article._id)}>Delete</button></div>
                 </article>
               ))}
