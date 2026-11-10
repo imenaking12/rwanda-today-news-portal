@@ -71,7 +71,6 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - A backend worker checks for due scheduled stories every 30 seconds and publishes them automatically while the API process is running.
 - Article fields for image URLs and optional YouTube links.
 - Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
-- Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
 - Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 

@@ -65,5 +65,5 @@ Rwanda, Politics, Business, Sports, Entertainment, Technology, World and Opinion
 - Backend: Node.js + Express
 - Database: MongoDB Atlas + Mongoose
 - Password hashing: bcryptjs
-- Media: Cloudinary (planned)
+- Media: Cloudinary signed image uploads (media library and video uploads pending)
 - Video source: YouTube embeds (URL support is present)
