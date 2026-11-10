@@ -27,6 +27,10 @@ const createDraftFromChatGPT = async (req, res) => {
     if (title.trim().length > 180 || excerpt.trim().length > 320 || content.length > 100000 || category.trim().length > 60) {
       return res.status(400).json({ success: false, message: 'One or more article fields exceed the allowed length.' });
     }
+    const allowedCategories = ['Rwanda', 'Politics', 'Business', 'Sports', 'Entertainment', 'Technology', 'World', 'Opinion'];
+    if (!allowedCategories.includes(category.trim())) {
+      return res.status(400).json({ success: false, message: 'category must be one of the supported Rwanda Today categories.' });
+    }
     if (author !== undefined && (typeof author !== 'string' || author.trim().length > 100)) {
       return res.status(400).json({ success: false, message: 'author must be text no longer than 100 characters.' });
     }
