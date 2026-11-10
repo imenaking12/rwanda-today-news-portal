@@ -6,6 +6,8 @@ require('dotenv').config();
 const articleRoutes = require('./routes/articleRoutes');
 const authRoutes = require('./routes/authRoutes');
 const chatGPTIntegrationRoutes = require('./routes/chatGPTIntegrationRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const { ensureDefaultCategories } = require('./services/defaultCategories');
 const { startPublishScheduler } = require('./services/publishScheduler');
 
 const app = express();
@@ -41,6 +43,7 @@ app.get('/api/status', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/integrations/chatgpt', chatGPTIntegrationRoutes);
 
 app.use((req, res) => {
@@ -49,8 +52,9 @@ app.use((req, res) => {
 
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log('MongoDB connected successfully!');
+    await ensureDefaultCategories();
     startPublishScheduler();
     app.listen(PORT, () => {
       console.log(`Rwanda Today server running on port ${PORT}`);
