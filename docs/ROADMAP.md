@@ -21,7 +21,9 @@
 - [x] Save and display article research source references for editorial verification
 - [x] Admin-managed breaking-news ticker for published stories
 - [ ] Homepage story ordering
-- [ ] Article SEO fields, slugs, social sharing and related stories
+- [x] Article SEO titles/descriptions and unique readable slugs
+- [x] Public article detail routes using slugs
+- [ ] Social sharing and related stories
 - [x] Server-side category filtering and search
 - [x] Paginated public article feed
 
@@ -35,7 +37,8 @@
 - [ ] Galleries and video news pages
 
 ## Phase 4: Reader experience
-- [ ] Responsive category pages and article URLs
+- [x] Responsive article URLs using SEO-friendly slugs
+- [ ] Responsive category pages
 - [ ] Related stories, bookmarks and reading history
 - [ ] Newsletter subscriptions
 - [ ] About, contact, corrections, privacy and editorial policy pages
