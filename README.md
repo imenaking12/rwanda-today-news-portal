@@ -76,7 +76,7 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 
 Saved stories and reading history are stored in the reader's browser only; they are not synced across devices.
 
-Set `PUBLIC_SITE_URL` to the deployed public website origin so sitemap and RSS links point to the live site.
+Set `PUBLIC_SITE_URL` to the deployed public website origin so sitemap and RSS links point to the live site. The public feeds are available at `/api/seo/sitemap.xml` and `/api/seo/rss.xml`.
 
 ## ChatGPT newsroom integration
 
