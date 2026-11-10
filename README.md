@@ -25,6 +25,12 @@ npm install
 
 Create `server/.env` using `server/.env.example` as a guide. Set a real MongoDB connection string and a long random JWT secret. Never commit `.env`.
 
+Run the article SEO migration once if your database already contains older stories:
+
+```powershell
+npm run migrate:article-seo
+```
+
 Create the first administrator once:
 
 ```powershell
@@ -57,7 +63,7 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 
 - Public newspaper homepage powered by published MongoDB articles.
 - Server-side article search, category filtering and pagination.
-- SEO-friendly article slugs and editable search metadata.
+- SEO-friendly article slugs, shareable article URLs and editable search metadata.
 - Featured-story ordering, admin-managed breaking-news ticker and article detail reading view.
 - Administrator sign-in with hashed passwords and signed, expiring bearer tokens.
 - Protected article creation, editing, publishing, draft saving and deletion.
