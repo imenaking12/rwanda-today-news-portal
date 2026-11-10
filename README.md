@@ -84,7 +84,7 @@ The API integration is implemented, but it cannot be used from ChatGPT until a p
 
 - Keep server credentials in `server/.env`; never paste them into chat or commit them.
 - The first administrator is created with the local one-time seed script, not a public registration endpoint.
-- The current admin token is stored in the browser session storage and expires after eight hours. A production deployment should move to secure, HttpOnly cookies, add login rate limiting, and configure strict deployment origins.
+- The current admin token is stored in browser session storage and expires after eight hours. The API now adds baseline security headers and a basic in-memory login rate limit (10 requests per IP per 15 minutes). Before a multi-instance production launch, move to secure HttpOnly cookies with CSRF protection and use a shared rate-limit store such as Redis.
 - Media URLs are supported now. Direct Cloudinary uploads and media-library management still require a Cloudinary account and server-side configuration.
 - Test all changes locally before treating a release as production-ready.
 
