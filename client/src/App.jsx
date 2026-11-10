@@ -56,6 +56,14 @@ function PublicSite({ path, navigate }) {
   const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 1 });
 
   useEffect(() => {
+    const onPopState = () => {
+      if (!window.location.pathname.startsWith('/article/')) setSelectedArticle(null);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  useEffect(() => {
     let active = true;
     const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
     if (category !== 'Home') params.set('category', category);
@@ -78,12 +86,10 @@ function PublicSite({ path, navigate }) {
   }, [category, search, page]);
 
   useEffect(() => {
-    const match = path.match(/^\\/article\\/(.+)$/);
-    if (!match) {
-      setSelectedArticle(null);
-      return undefined;
-    }
-    const identifier = decodeURIComponent(match[1]);
+    const identifier = path.startsWith('/article/')
+      ? decodeURIComponent(path.slice('/article/'.length))
+      : '';
+    if (!identifier) return undefined;
     if (selectedArticle && (selectedArticle.slug === identifier || selectedArticle._id === identifier)) {
       return undefined;
     }
@@ -129,6 +135,10 @@ function PublicSite({ path, navigate }) {
       'Independent reporting, news, context and perspective from Rwanda and around the world.';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', description);
+    const openGraphTitle = document.querySelector('meta[property="og:title"]');
+    if (openGraphTitle) openGraphTitle.setAttribute('content', selectedArticle?.title || defaultTitle);
+    const openGraphDescription = document.querySelector('meta[property="og:description"]');
+    if (openGraphDescription) openGraphDescription.setAttribute('content', description);
   }, [selectedArticle]);
 
   const featured = articles.find((article) => article.isFeatured) || articles[0];
@@ -180,7 +190,7 @@ function PublicSite({ path, navigate }) {
         ) : (
           <>
             {featured && <section className="lead-story-section"><ArticleCard article={featured} onOpen={openArticle} featured /></section>}
-            {remaining.length > 0 && <section className="latest-section"><div className="section-title compact"><div><span className="eyebrow">FRESH FROM THE NEWSROOM</span><h2>Latest stories</h2></div><span className="article-count">{pagination.total} stories</span></div><div className="news-grid">{remaining.map((article) => <ArticleCard key={article._id} article={article} onOpen={setSelectedArticle} />)}</div></section>}
+            {remaining.length > 0 && <section className="latest-section"><div className="section-title compact"><div><span className="eyebrow">FRESH FROM THE NEWSROOM</span><h2>Latest stories</h2></div><span className="article-count">{pagination.total} stories</span></div><div className="news-grid">{remaining.map((article) => <ArticleCard key={article._id} article={article} onOpen={openArticle} />)}</div></section>}
             <nav className="pagination" aria-label="Article pages">
               <button className="outline-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1 || loading}>← Previous</button>
               <span>Page {pagination.page || page} of {pagination.totalPages || 1}</span>
