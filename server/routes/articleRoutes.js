@@ -3,6 +3,7 @@ const {
   getArticles,
   getBreakingNews,
   getArticleBySlug,
+  getRelatedArticles,
   getArticleById,
   getAdminArticles,
   createArticle,
@@ -17,6 +18,7 @@ const router = express.Router();
 router.get('/', getArticles);
 router.get('/breaking', getBreakingNews);
 router.get('/slug/:slug', getArticleBySlug);
+router.get('/:id/related', getRelatedArticles);
 
 // All article management endpoints require an authenticated administrator.
 router.get('/admin/all', requireAdmin, getAdminArticles);
