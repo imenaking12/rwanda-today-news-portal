@@ -64,12 +64,26 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
 
+## ChatGPT newsroom integration
+
+Rwanda Today includes a protected endpoint for ChatGPT Actions. You can research a story in ChatGPT, ask your connected GPT to prepare an article, and have it save the result as an **unpublished draft** in the Rwanda Today newsroom. It cannot publish, edit, or delete stories through this integration.
+
+- API endpoint: `POST /api/integrations/chatgpt/articles/drafts`
+- OpenAPI contract: `docs/chatgpt-actions-openapi.yaml`
+- Authentication: a private bearer token configured as `CHATGPT_INTEGRATION_TOKEN` on the server.
+- Configure the deployed API URL and bearer-token authentication in a ChatGPT GPT Action using the OpenAPI contract.
+- Replace the placeholder server URL in the OpenAPI file with the real deployed API URL.
+- Generate a secret locally (never in chat): `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`
+- The endpoint always creates a draft. An administrator must fact-check it, edit it if needed, and publish it from the dashboard.
+
+The API integration is implemented, but it cannot be used from ChatGPT until a production API domain is deployed, the private token is configured, and the GPT Action is connected.
+
 ## Important security notes
 
 - Keep server credentials in `server/.env`; never paste them into chat or commit them.
 - The first administrator is created with the local one-time seed script, not a public registration endpoint.
 - The current admin token is stored in the browser session storage and expires after eight hours. A production deployment should move to secure, HttpOnly cookies, add login rate limiting, and configure strict deployment origins.
-- Media URLs are supported now. Direct Cloudinary uploads and media-library management are a later integration step.
+- Media URLs are supported now. Direct Cloudinary uploads and media-library management still require a Cloudinary account and server-side configuration.
 - Test all changes locally before treating a release as production-ready.
 
 ## Automated checks
