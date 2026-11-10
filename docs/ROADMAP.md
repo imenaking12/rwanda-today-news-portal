@@ -17,6 +17,7 @@
 - [ ] Category management
 - [ ] Draft preview and scheduled publishing
 - [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts
+- [x] Save and display article research source references for editorial verification
 - [ ] Breaking-news ticker and homepage story ordering
 - [ ] Article SEO fields, slugs, social sharing and related stories
 - [x] Server-side category filtering and search
