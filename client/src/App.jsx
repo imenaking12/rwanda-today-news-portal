@@ -154,6 +154,8 @@ function PublicSite({ path, navigate }) {
 
   const openArticle = (article) => {
     setSelectedArticle(article);
+    setRelatedArticles([]);
+    setShareMessage('');
     navigate(`/article/${article.slug || article._id}`);
   };
   const closeArticle = () => {
