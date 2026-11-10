@@ -10,7 +10,7 @@ const toLocalDateTime = (value) => {
 
 const emptyForm = {
   title: '', excerpt: '', content: '', category: 'Rwanda', author: 'Rwanda Today',
-  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, isBreakingNews: false, metaTitle: '', metaDescription: '', scheduledAt: '', tags: '',
+  featuredImage: '', videoUrl: '', status: 'draft', isFeatured: false, homepageOrder: 0, isBreakingNews: false, metaTitle: '', metaDescription: '', scheduledAt: '', tags: '',
 };
 
 export default function AdminDashboard({ admin, onLogout }) {
@@ -170,6 +170,7 @@ export default function AdminDashboard({ admin, onLogout }) {
       videoUrl: article.videoUrl || '',
       status: article.status || 'draft',
       isFeatured: Boolean(article.isFeatured),
+      homepageOrder: Number.isInteger(article.homepageOrder) ? article.homepageOrder : 0,
       isBreakingNews: Boolean(article.isBreakingNews),
       metaTitle: article.metaTitle || '',
       metaDescription: article.metaDescription || '',
@@ -186,6 +187,7 @@ export default function AdminDashboard({ admin, onLogout }) {
     setMessage('');
     const payload = {
       ...form,
+      homepageOrder: Number(form.homepageOrder),
       tags: form.tags.split(',').map((tag) => tag.trim()).filter(Boolean),
       scheduledAt: form.scheduledAt ? new Date(form.scheduledAt).toISOString() : null,
       status: form.scheduledAt ? 'draft' : form.status,
@@ -258,6 +260,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <label>Publishing status<select name="status" value={form.scheduledAt ? 'draft' : form.status} onChange={updateField} disabled={Boolean(form.scheduledAt)}><option value="draft">Save as draft</option><option value="published">Publish now</option></select></label>
             <label className="full-field">Schedule publication (optional)<input type="datetime-local" name="scheduledAt" value={form.scheduledAt} min={toLocalDateTime(new Date())} onChange={updateField} /></label>
             <p className="muted full-field">A scheduled story stays private as a draft until its selected time. The backend must be running to publish it automatically.</p>
+            <label>Homepage priority (0–999)<input type="number" name="homepageOrder" min="0" max="999" step="1" value={form.homepageOrder} onChange={updateField} /><small>Higher numbers appear earlier among stories with the same featured status. Use 0 for normal ordering.</small></label>
             <label className="checkbox-label"><input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={updateField} /> Feature on homepage</label>
             <label className="checkbox-label"><input type="checkbox" name="isBreakingNews" checked={form.isBreakingNews} onChange={updateField} /> Show in breaking-news ticker</label>
             <div className="form-actions full-field"><button className="primary-button" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Update article' : 'Save article'}</button></div>
