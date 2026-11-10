@@ -57,6 +57,7 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 
 - Public newspaper homepage powered by published MongoDB articles.
 - Server-side article search, category filtering and pagination.
+- SEO-friendly article slugs and editable search metadata.
 - Featured-story ordering, admin-managed breaking-news ticker and article detail reading view.
 - Administrator sign-in with hashed passwords and signed, expiring bearer tokens.
 - Protected article creation, editing, publishing, draft saving and deletion.
