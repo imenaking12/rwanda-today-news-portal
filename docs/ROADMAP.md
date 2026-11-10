@@ -16,7 +16,7 @@
 - [ ] Rich-text editor with safe content rendering
 - [ ] Category management
 - [x] Safe unpublished draft preview in the admin editor
-- [ ] Scheduled publishing
+- [x] Scheduled publishing with a server-side publishing worker
 - [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts
 - [x] Save and display article research source references for editorial verification
 - [x] Admin-managed breaking-news ticker for published stories
