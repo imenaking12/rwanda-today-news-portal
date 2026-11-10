@@ -39,6 +39,14 @@ paths:
                 author:
                   type: string
                   maxLength: 100
+                metaTitle:
+                  type: string
+                  maxLength: 70
+                  description: Optional search and social title.
+                metaDescription:
+                  type: string
+                  maxLength: 180
+                  description: Optional search description.
                 featuredImage:
                   type: string
                   format: uri
