@@ -20,6 +20,10 @@ const articleSchema = new mongoose.Schema(
       type: [{ type: String, trim: true, maxlength: 40 }],
       default: [],
     },
+    sources: {
+      type: [{ title: { type: String, trim: true, maxlength: 180 }, url: { type: String, trim: true, maxlength: 2048 } }],
+      default: [],
+    },
     publishedAt: { type: Date, default: null },
   },
   { timestamps: true }

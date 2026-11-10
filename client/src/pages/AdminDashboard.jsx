@@ -14,6 +14,7 @@ export default function AdminDashboard({ admin, onLogout }) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const loadArticles = async () => {
     try {
@@ -30,7 +31,25 @@ export default function AdminDashboard({ admin, onLogout }) {
     }
   };
 
-  useEffect(() => { loadArticles(); }, []);
+  useEffect(() => {
+    let active = true;
+    apiRequest('/articles/admin/all')
+      .then((data) => {
+        if (active) setArticles(data.articles || []);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(err.message);
+        if (err.message.toLowerCase().includes('session') || err.message.toLowerCase().includes('authentication')) {
+          clearAdminToken();
+          onLogout();
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [onLogout]);
 
   const updateField = (event) => {
     const { name, value, checked, type } = event.target;
@@ -120,7 +139,7 @@ export default function AdminDashboard({ admin, onLogout }) {
         {error && <p className="form-error">{error}</p>}
 
         <section className="editor-panel">
-          <div className="panel-heading"><h2>{editingId ? 'Edit article' : 'Write a new article'}</h2>{editingId && <button className="text-button" onClick={resetForm}>Cancel editing</button>}</div>
+          <div className="panel-heading"><h2>{editingId ? 'Edit article' : 'Write a new article'}</h2><div className="row-actions"><button type="button" className="text-button" onClick={() => setPreviewOpen((open) => !open)}>{previewOpen ? 'Hide preview' : 'Preview draft'}</button>{editingId && <button type="button" className="text-button" onClick={resetForm}>Cancel editing</button>}</div></div>
           <form className="article-form" onSubmit={submitArticle}>
             <label>Headline<input name="title" value={form.title} onChange={updateField} required maxLength="180" /></label>
             <label>Short summary<textarea name="excerpt" value={form.excerpt} onChange={updateField} required rows="2" maxLength="320" /></label>
@@ -134,6 +153,14 @@ export default function AdminDashboard({ admin, onLogout }) {
             <label className="checkbox-label"><input type="checkbox" name="isFeatured" checked={form.isFeatured} onChange={updateField} /> Feature on homepage</label>
             <div className="form-actions full-field"><button className="primary-button" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Update article' : 'Save article'}</button></div>
           </form>
+          {previewOpen && <section className="draft-preview" aria-label="Article preview">
+            <p className="eyebrow">EDITORIAL PREVIEW · NOT PUBLISHED</p>
+            <span className="category-label">{form.category || 'Category'}</span>
+            <h2>{form.title || 'Your headline will appear here'}</h2>
+            <p className="preview-excerpt">{form.excerpt || 'Your short summary will appear here.'}</p>
+            {form.featuredImage && <img src={form.featuredImage} alt="Article preview" />}
+            <div className="preview-content">{form.content ? form.content.split('\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>) : <p>Your article text will appear here.</p>}</div>
+          </section>}
         </section>
 
         <section className="article-list-panel">
@@ -142,7 +169,7 @@ export default function AdminDashboard({ admin, onLogout }) {
             <div className="admin-article-list">
               {articles.map((article) => (
                 <article className="admin-article-row" key={article._id}>
-                  <div><span className={`status-pill ${article.status}`}>{article.status}</span><h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p></div>
+                  <div><span className={`status-pill ${article.status}`}>{article.status}</span><h3>{article.title}</h3><p>{article.category} · {article.author || 'Rwanda Today'}</p>{article.sources?.length > 0 && <p className="source-list">Research sources: {article.sources.map((source, index) => <a key={source.url + index} href={source.url} target="_blank" rel="noreferrer">{source.title}</a>)}</p>}</div>
                   <div className="row-actions"><button className="outline-button" onClick={() => editArticle(article)}>Edit</button><button className="danger-button" onClick={() => deleteArticle(article._id)}>Delete</button></div>
                 </article>
               ))}

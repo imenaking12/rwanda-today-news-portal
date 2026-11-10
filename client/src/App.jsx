@@ -92,6 +92,7 @@ function PublicSite() {
           {selectedArticle.featuredImage && <img className="article-hero-image" src={selectedArticle.featuredImage} alt="" />}
           {getYouTubeEmbedUrl(selectedArticle.videoUrl) && <section className="article-video"><h2>Watch the video</h2><div className="video-frame"><iframe src={getYouTubeEmbedUrl(selectedArticle.videoUrl)} title={'YouTube video: ' + selectedArticle.title} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div></section>}
           <div className="article-content">{selectedArticle.content.split('\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
+          {selectedArticle.sources?.length > 0 && <section className="article-sources"><h2>Sources and references</h2><ul>{selectedArticle.sources.map((source, index) => <li key={source.url + index}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a></li>)}</ul></section>}
           <div className="article-tags">{(selectedArticle.tags || []).map((tag) => <span key={tag}>#{tag}</span>)}</div>
         </main>
         <footer className="site-footer"><strong>RWANDA <span>TODAY</span></strong><p>Independent reporting. Stories that matter.</p></footer>

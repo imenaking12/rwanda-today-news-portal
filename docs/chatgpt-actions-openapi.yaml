@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: Rwanda Today Editorial Actions
+  version: 1.0.0
+  description: Create editorial drafts from ChatGPT research. This API cannot publish articles.
+servers:
+  - url: https://YOUR_DEPLOYED_API_DOMAIN/api
+    description: Replace with the deployed Rwanda Today API origin.
+security:
+  - bearerAuth: []
+paths:
+  /integrations/chatgpt/articles/drafts:
+    post:
+      operationId: createRwandaTodayDraft
+      summary: Save a researched article as an unpublished Rwanda Today draft
+      description: Creates a draft only. An administrator must review and publish it in the newsroom dashboard.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [title, excerpt, content, category]
+              properties:
+                title:
+                  type: string
+                  maxLength: 180
+                excerpt:
+                  type: string
+                  maxLength: 320
+                content:
+                  type: string
+                  maxLength: 100000
+                category:
+                  type: string
+                  maxLength: 60
+                  enum: [Rwanda, Politics, Business, Sports, Entertainment, Technology, World, Opinion]
+                author:
+                  type: string
+                  maxLength: 100
+                featuredImage:
+                  type: string
+                  format: uri
+                videoUrl:
+                  type: string
+                  format: uri
+                tags:
+                  type: array
+                  maxItems: 20
+                  items:
+                    type: string
+                    maxLength: 40
+                sources:
+                  type: array
+                  maxItems: 20
+                  description: Research references for the editor to verify before publication.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [title, url]
+                    properties:
+                      title:
+                        type: string
+                        maxLength: 180
+                      url:
+                        type: string
+                        format: uri
+                        maxLength: 2048
+      responses:
+        '201':
+          description: Draft saved successfully; publication still requires administrator approval.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  article:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      title:
+                        type: string
+                      category:
+                        type: string
+                      status:
+                        type: string
+                        enum: [draft]
+                      createdAt:
+                        type: string
+                        format: date-time
+        '400':
+          description: Invalid article data.
+        '401':
+          description: Missing or invalid integration token.
+        '500':
+          description: Draft creation failed.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Secret integration token
