@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const articleRoutes = require('./routes/articleRoutes');
 const authRoutes = require('./routes/authRoutes');
+const chatGPTIntegrationRoutes = require('./routes/chatGPTIntegrationRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -27,6 +28,7 @@ app.get('/api/status', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/articles', articleRoutes);
+app.use('/api/integrations/chatgpt', chatGPTIntegrationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'API route not found.' });
