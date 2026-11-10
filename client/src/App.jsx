@@ -50,6 +50,8 @@ function PublicSite({ path, navigate }) {
   const [category, setCategory] = useState('Home');
   const [search, setSearch] = useState('');
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [relatedArticles, setRelatedArticles] = useState([]);
+  const [shareMessage, setShareMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState('');
   const [page, setPage] = useState(1);
@@ -117,6 +119,39 @@ function PublicSite({ path, navigate }) {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    if (!selectedArticle?._id) return undefined;
+    let active = true;
+    apiRequest(`/articles/${selectedArticle._id}/related`)
+      .then((data) => {
+        if (active) setRelatedArticles(data.articles || []);
+      })
+      .catch(() => {
+        if (active) setRelatedArticles([]);
+      });
+    return () => { active = false; };
+  }, [selectedArticle?._id]);
+
+  const shareArticle = async () => {
+    const url = window.location.href;
+    const shareData = { title: selectedArticle.title, text: selectedArticle.excerpt, url };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        setShareMessage('Story shared.');
+      } catch (error) {
+        if (error.name !== 'AbortError') setShareMessage('Sharing was not available. You can copy the page URL from your browser.');
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareMessage('Story link copied.');
+    } catch {
+      setShareMessage('Copy the story URL from your browser address bar.');
+    }
+  };
+
   const openArticle = (article) => {
     setSelectedArticle(article);
     navigate(`/article/${article.slug || article._id}`);
@@ -162,6 +197,8 @@ function PublicSite({ path, navigate }) {
           {getYouTubeEmbedUrl(selectedArticle.videoUrl) && <section className="article-video"><h2>Watch the video</h2><div className="video-frame"><iframe src={getYouTubeEmbedUrl(selectedArticle.videoUrl)} title={'YouTube video: ' + selectedArticle.title} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div></section>}
           <div className="article-content">{selectedArticle.content.split('\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
           {selectedArticle.sources?.length > 0 && <section className="article-sources"><h2>Sources and references</h2><ul>{selectedArticle.sources.map((source, index) => <li key={source.url + index}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a></li>)}</ul></section>}
+          <div className="article-actions"><button type="button" className="outline-button" onClick={shareArticle}>Share story</button>{shareMessage && <span role="status">{shareMessage}</span>}</div>
+          {relatedArticles.length > 0 && <section className="related-stories"><h2>Related stories</h2><div>{relatedArticles.map((story) => <button type="button" key={story._id} onClick={() => openArticle(story)}>{story.title}<span>{story.category}</span></button>)}</div></section>}
           <div className="article-tags">{(selectedArticle.tags || []).map((tag) => <span key={tag}>#{tag}</span>)}</div>
         </main>
         <footer className="site-footer"><strong>RWANDA <span>TODAY</span></strong><p>Independent reporting. Stories that matter.</p></footer>
