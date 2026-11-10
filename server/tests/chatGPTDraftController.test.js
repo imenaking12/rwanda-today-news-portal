@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const Article = require('../models/Article');
+const Category = require('../models/Category');
 const { createDraftFromChatGPT } = require('../controllers/chatGPTIntegrationController');
 
 const validDraft = {
@@ -25,7 +26,9 @@ const invoke = async (body) => {
 
 test('creates an unpublished draft and retains its research references', async () => {
   const originalCreate = Article.create;
+  const originalFindOne = Category.findOne;
   let saved;
+  Category.findOne = () => ({ select: async () => ({ name: 'Rwanda' }) });
   Article.create = async (payload) => {
     saved = payload;
     return {
@@ -44,18 +47,31 @@ test('creates an unpublished draft and retains its research references', async (
     assert.equal(result.body.article.status, 'draft');
   } finally {
     Article.create = originalCreate;
+    Category.findOne = originalFindOne;
   }
 });
 
-test('rejects unsupported newsroom categories', async () => {
-  const result = await invoke({ ...validDraft, category: 'Unsupported' });
-  assert.equal(result.statusCode, 400);
+test('rejects categories that are not active newsroom categories', async () => {
+  const originalFindOne = Category.findOne;
+  Category.findOne = () => ({ select: async () => null });
+  try {
+    const result = await invoke({ ...validDraft, category: 'Unsupported' });
+    assert.equal(result.statusCode, 400);
+  } finally {
+    Category.findOne = originalFindOne;
+  }
 });
 
 test('rejects unsafe or overlong research source URLs', async () => {
-  const result = await invoke({
-    ...validDraft,
-    sources: [{ title: 'Untrusted source', url: 'javascript:alert(1)' }],
-  });
-  assert.equal(result.statusCode, 400);
+  const originalFindOne = Category.findOne;
+  Category.findOne = () => ({ select: async () => ({ name: 'Rwanda' }) });
+  try {
+    const result = await invoke({
+      ...validDraft,
+      sources: [{ title: 'Untrusted source', url: 'javascript:alert(1)' }],
+    });
+    assert.equal(result.statusCode, 400);
+  } finally {
+    Category.findOne = originalFindOne;
+  }
 });

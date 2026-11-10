@@ -17,7 +17,7 @@
 - [x] Administrator category creation and activation/deactivation
 - [x] Safe unpublished draft preview in the admin editor
 - [x] Scheduled publishing with a server-side publishing worker (runs while the API is awake)
-- [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts
+- [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts using active newsroom-managed categories
 - [x] Save and display article research source references for editorial verification
 - [x] Admin-managed breaking-news ticker for published stories
 - [ ] Homepage story ordering

@@ -104,6 +104,10 @@ See `docs/CLOUDINARY-SETUP.md` for signed image-upload configuration.
 - Signed Cloudinary uploads are implemented. Add the Cloudinary environment values from `.env.example` to activate them; media-library management and video uploads remain future work.
 - Test all changes locally before treating a release as production-ready.
 
+## Production deployment
+
+See `docs/PRODUCTION-DEPLOYMENT.md` for the Render API, Cloudflare Pages website, MongoDB Atlas, Cloudinary and ChatGPT Action launch checklist. The deployment guide contains placeholders only; add real credentials privately in the relevant provider dashboards.
+
 ## Automated checks
 
 GitHub Actions runs backend unit tests and frontend ESLint/build checks for pull requests targeting `main` and pushes to `main` or feature branches. The backend tests can also be run locally with `npm test` from the `server/` directory.

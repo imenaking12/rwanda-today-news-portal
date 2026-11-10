@@ -9,6 +9,33 @@ servers:
 security:
   - bearerAuth: []
 paths:
+  /categories:
+    get:
+      operationId: listRwandaTodayCategories
+      summary: List active newsroom categories
+      description: Returns the current categories that may be used when preparing a Rwanda Today draft.
+      security: []
+      responses:
+        '200':
+          description: Active categories ordered for the newsroom.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        slug:
+                          type: string
+                        description:
+                          type: string
   /integrations/chatgpt/articles/drafts:
     post:
       operationId: createRwandaTodayDraft
@@ -35,7 +62,7 @@ paths:
                 category:
                   type: string
                   maxLength: 60
-                  enum: [Rwanda, Politics, Business, Sports, Entertainment, Technology, World, Opinion]
+                  description: Must match the name of an active category returned by GET /categories.
                 author:
                   type: string
                   maxLength: 100
