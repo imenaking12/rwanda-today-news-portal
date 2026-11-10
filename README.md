@@ -64,6 +64,7 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - Public newspaper homepage powered by published MongoDB articles.
 - Server-side article search, category filtering and pagination.
 - SEO-friendly article slugs, shareable article URLs, editable search metadata, related stories and story sharing.
+- Reader bookmarks and reading history saved locally in the current browser.
 - Featured-story ordering, admin-managed categories and breaking-news ticker, and article detail reading view.
 - Administrator sign-in with hashed passwords and signed, expiring bearer tokens.
 - Protected article creation, editing, immediate publishing, scheduled publishing, draft saving and deletion.
@@ -73,6 +74,8 @@ Optional: create `client/.env.local` and set `VITE_API_URL=http://localhost:5000
 - Signed Cloudinary image uploads from the admin editor (requires private Cloudinary credentials in the backend environment).
 - Responsive YouTube embeds on public article pages, using privacy-enhanced YouTube embed URLs.
 - Backend validation that accepts supported YouTube video URL formats and rejects unrelated hosts.
+
+Saved stories and reading history are stored in the reader's browser only; they are not synced across devices.
 
 ## ChatGPT newsroom integration
 

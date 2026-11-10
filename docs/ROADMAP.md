@@ -42,7 +42,7 @@
 - [x] Responsive article URLs using SEO-friendly slugs
 - [ ] Responsive category pages
 - [x] Related stories
-- [ ] Bookmarks and reading history
+- [x] Saved stories/bookmarks and reading history (stored locally in the reader's browser)
 - [ ] Newsletter subscriptions
 - [ ] About, contact, corrections, privacy and editorial policy pages
 - [ ] Accessibility, metadata, sitemap and performance improvements
