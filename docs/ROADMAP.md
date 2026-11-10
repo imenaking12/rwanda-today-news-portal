@@ -44,7 +44,6 @@
 ## Phase 5: Production readiness
 - [ ] Secure HttpOnly cookie sessions and CSRF strategy
 - [x] Baseline security headers and in-memory administrator login rate limiting
-- [ ] Login rate limiting, validation and security headers
 - [ ] Role/permission model and audit logs
 - [x] Automated backend tests and GitHub Actions workflow added (checks must pass before merge)
 - [ ] Error monitoring, backups and deployment configuration
