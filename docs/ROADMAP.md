@@ -14,7 +14,7 @@
 
 ## Phase 2: Editorial workflow and reader discovery
 - [ ] Rich-text editor with safe content rendering
-- [ ] Category management
+- [x] Administrator category creation and activation/deactivation
 - [x] Safe unpublished draft preview in the admin editor
 - [x] Scheduled publishing with a server-side publishing worker (runs while the API is awake)
 - [x] Protected ChatGPT Actions endpoint for creating unpublished article drafts
