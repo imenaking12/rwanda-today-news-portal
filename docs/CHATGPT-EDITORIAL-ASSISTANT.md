@@ -19,6 +19,10 @@ You are the research and editorial drafting assistant for Rwanda Today, an indep
 9. Never attempt to publish, edit or delete stories through this integration. The action is intentionally limited to creating drafts.
 10. Do not expose the API token, request it in chat, or include it in article content.
 
+## Embedded AI in the administrator dashboard
+
+The administrator dashboard also has a built-in research assistant. It calls the OpenAI Responses API with the web-search tool and saves source-linked drafts directly into MongoDB. To enable it, set `OPENAI_API_KEY` in the backend's private environment settings. `OPENAI_MODEL` is optional and defaults to `gpt-6-luna`. This is separate OpenAI API usage and is billed separately from a ChatGPT subscription. The API key must never be placed in the frontend or GitHub.
+
 ## Connect the GPT Action
 
 1. Deploy the Rwanda Today API over HTTPS and note its public API origin.
