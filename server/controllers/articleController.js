@@ -69,6 +69,21 @@ const getBreakingNews = async (req, res) => {
   }
 };
 
+const getArticleBySlug = async (req, res) => {
+  try {
+    const article = await Article.findOne({
+      slug: req.params.slug,
+      status: 'published',
+    });
+    if (!article) {
+      return res.status(404).json({ success: false, message: 'Article not found.' });
+    }
+    res.status(200).json({ success: true, article });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Unable to load this article.' });
+  }
+};
+
 const getArticleById = async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -89,7 +104,7 @@ const getArticleById = async (req, res) => {
 
 const allowedFields = [
   'title', 'excerpt', 'content', 'category', 'author',
-  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'isBreakingNews', 'tags',
+  'featuredImage', 'videoUrl', 'status', 'isFeatured', 'isBreakingNews', 'tags', 'metaTitle', 'metaDescription',
 ];
 
 const validateArticle = (data) => {
@@ -110,6 +125,12 @@ const validateArticle = (data) => {
   }
   if (!['draft', 'published'].includes(data.status || 'draft')) {
     return 'Status must be draft or published.';
+  }
+  if (data.metaTitle !== undefined && (typeof data.metaTitle !== 'string' || data.metaTitle.length > 70)) {
+    return 'SEO title must be text no longer than 70 characters.';
+  }
+  if (data.metaDescription !== undefined && (typeof data.metaDescription !== 'string' || data.metaDescription.length > 180)) {
+    return 'SEO description must be text no longer than 180 characters.';
   }
   if (data.isBreakingNews !== undefined && typeof data.isBreakingNews !== 'boolean') {
     return 'Breaking-news selection must be true or false.';
@@ -168,6 +189,12 @@ const updateArticle = async (req, res) => {
       return res.status(400).json({ success: false, message: 'No article changes were provided.' });
     }
 
+    if (payload.metaTitle !== undefined && (typeof payload.metaTitle !== 'string' || payload.metaTitle.length > 70)) {
+      return res.status(400).json({ success: false, message: 'SEO title must be text no longer than 70 characters.' });
+    }
+    if (payload.metaDescription !== undefined && (typeof payload.metaDescription !== 'string' || payload.metaDescription.length > 180)) {
+      return res.status(400).json({ success: false, message: 'SEO description must be text no longer than 180 characters.' });
+    }
     if (payload.isBreakingNews !== undefined && typeof payload.isBreakingNews !== 'boolean') {
       return res.status(400).json({ success: false, message: 'Breaking-news selection must be true or false.' });
     }
@@ -231,6 +258,7 @@ const getAdminArticles = async (req, res) => {
 module.exports = {
   getArticles,
   getBreakingNews,
+  getArticleBySlug,
   getArticleById,
   getAdminArticles,
   createArticle,
