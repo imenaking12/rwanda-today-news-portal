@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
@@ -6,6 +6,27 @@ import { apiRequest, clearAdminToken, getStoredToken } from './services/api';
 
 const defaultCategories = ['Rwanda', 'Politics', 'Business', 'Sports', 'Entertainment', 'Technology', 'World', 'Opinion'];
 const PAGE_SIZE = 9;
+
+const readStoredStories = (key) => {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || '[]');
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+};
+
+const storySummary = (article) => ({
+  _id: article._id,
+  slug: article.slug,
+  title: article.title,
+  excerpt: article.excerpt,
+  category: article.category,
+  author: article.author,
+  featuredImage: article.featuredImage,
+  publishedAt: article.publishedAt,
+  createdAt: article.createdAt,
+});
 
 const formatDate = (value) => {
   if (!value) return 'Latest';
@@ -53,10 +74,27 @@ function PublicSite({ path, navigate }) {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [relatedArticles, setRelatedArticles] = useState([]);
   const [shareMessage, setShareMessage] = useState('');
+  const [savedStories, setSavedStories] = useState(() => readStoredStories('rwandaTodaySavedStories'));
+  const [readingHistory, setReadingHistory] = useState(() => readStoredStories('rwandaTodayReadingHistory'));
+  const [savedView, setSavedView] = useState(false);
+  const [historyView, setHistoryView] = useState(false);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState('');
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 1 });
+
+  const recordReading = useCallback((article) => {
+    const summary = storySummary(article);
+    setReadingHistory((current) => [summary, ...current.filter((item) => item._id !== summary._id)].slice(0, 20));
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem('rwandaTodaySavedStories', JSON.stringify(savedStories)); } catch {}
+  }, [savedStories]);
+
+  useEffect(() => {
+    try { localStorage.setItem('rwandaTodayReadingHistory', JSON.stringify(readingHistory)); } catch {}
+  }, [readingHistory]);
 
   useEffect(() => {
     const onPopState = () => {
@@ -112,13 +150,16 @@ function PublicSite({ path, navigate }) {
     const isObjectId = /^[a-f0-9]{24}$/i.test(identifier);
     apiRequest(isObjectId ? `/articles/${identifier}` : `/articles/slug/${encodeURIComponent(identifier)}`)
       .then((data) => {
-        if (active) setSelectedArticle(data.article);
+        if (active) {
+          setSelectedArticle(data.article);
+          recordReading(data.article);
+        }
       })
       .catch(() => {
         if (active) setSelectedArticle(null);
       });
     return () => { active = false; };
-  }, [path, selectedArticle?.slug, selectedArticle?._id]);
+  }, [path, selectedArticle?.slug, selectedArticle?._id, recordReading]);
 
   useEffect(() => {
     let active = true;
@@ -165,8 +206,18 @@ function PublicSite({ path, navigate }) {
     }
   };
 
+  const toggleSavedStory = (article) => {
+    const summary = storySummary(article);
+    setSavedStories((current) => current.some((item) => item._id === summary._id)
+      ? current.filter((item) => item._id !== summary._id)
+      : [summary, ...current]);
+  };
+
   const openArticle = (article) => {
-    setSelectedArticle(article);
+    setSelectedArticle(article.content ? article : null);
+    recordReading(article);
+    setSavedView(false);
+    setHistoryView(false);
     setRelatedArticles([]);
     setShareMessage('');
     navigate(`/article/${article.slug || article._id}`);
@@ -212,7 +263,7 @@ function PublicSite({ path, navigate }) {
           {getYouTubeEmbedUrl(selectedArticle.videoUrl) && <section className="article-video"><h2>Watch the video</h2><div className="video-frame"><iframe src={getYouTubeEmbedUrl(selectedArticle.videoUrl)} title={'YouTube video: ' + selectedArticle.title} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div></section>}
           <div className="article-content">{selectedArticle.content.split('\n').filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
           {selectedArticle.sources?.length > 0 && <section className="article-sources"><h2>Sources and references</h2><ul>{selectedArticle.sources.map((source, index) => <li key={source.url + index}><a href={source.url} target="_blank" rel="noreferrer">{source.title}</a></li>)}</ul></section>}
-          <div className="article-actions"><button type="button" className="outline-button" onClick={shareArticle}>Share story</button>{shareMessage && <span role="status">{shareMessage}</span>}</div>
+          <div className="article-actions"><button type="button" className="outline-button" onClick={() => toggleSavedStory(selectedArticle)}>{savedStories.some((item) => item._id === selectedArticle._id) ? 'Remove saved story' : 'Save for later'}</button><button type="button" className="outline-button" onClick={shareArticle}>Share story</button>{shareMessage && <span role="status">{shareMessage}</span>}</div>
           {relatedArticles.length > 0 && <section className="related-stories"><h2>Related stories</h2><div>{relatedArticles.map((story) => <button type="button" key={story._id} onClick={() => openArticle(story)}>{story.title}<span>{story.category}</span></button>)}</div></section>}
           <div className="article-tags">{(selectedArticle.tags || []).map((tag) => <span key={tag}>#{tag}</span>)}</div>
         </main>
@@ -228,7 +279,9 @@ function PublicSite({ path, navigate }) {
         <a className="masthead" href="/">RWANDA <span>TODAY</span></a>
         <p className="masthead-tagline">THE STORIES THAT MATTER</p>
         <nav className="category-nav" aria-label="News categories">
-          {['Home', ...categoryList].map((item) => <button className={category === item ? 'active' : ''} key={item} onClick={() => { setCategory(item); setPage(1); }}>{item}</button>)}
+          {['Home', ...categoryList].map((item) => <button className={!savedView && !historyView && category === item ? 'active' : ''} key={item} onClick={() => { setSavedView(false); setHistoryView(false); setCategory(item); setPage(1); }}>{item}</button>)}
+          <button className={savedView ? 'active' : ''} onClick={() => { setSavedView(true); setHistoryView(false); }}>Saved ({savedStories.length})</button>
+          <button className={historyView ? 'active' : ''} onClick={() => { setHistoryView(true); setSavedView(false); }}>Reading history</button>
         </nav>
       </header>
 
@@ -236,22 +289,33 @@ function PublicSite({ path, navigate }) {
 
       <main className="home-content">
         <div className="section-title">
-          <div><span className="eyebrow">YOUR DAILY BRIEFING</span><h1>{category === 'Home' ? 'Top stories' : category}</h1></div>
-          <label className="search-box"><span aria-hidden="true">⌕</span><input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search the news" aria-label="Search news articles" /></label>
+          <div><span className="eyebrow">{savedView || historyView ? 'YOUR LIBRARY' : 'YOUR DAILY BRIEFING'}</span><h1>{savedView ? 'Saved stories' : historyView ? 'Reading history' : category === 'Home' ? 'Top stories' : category}</h1></div>
+          {!savedView && !historyView && <label className="search-box"><span aria-hidden="true">⌕</span><input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search the news" aria-label="Search news articles" /></label>}
+          {historyView && <button className="text-button" onClick={() => setReadingHistory([])}>Clear history</button>}
         </div>
 
-        {apiError && <div className="notice"><strong>News service unavailable.</strong> Start the Rwanda Today backend to load published stories. <span>{apiError}</span></div>}
-        {loading ? <div className="loading-state" role="status">Loading the latest headlines…</div> : articles.length === 0 ? (
-          <div className="empty-news"><span className="eyebrow">THE NEWSROOM</span><h2>{search ? 'No matching stories found' : 'Your next headline starts here.'}</h2><p>{search ? 'Try another search term or choose a different category.' : 'Published articles from the editorial dashboard will appear here.'}</p></div>
+        {savedView || historyView ? (
+          <section className="library-section">
+            {(savedView ? savedStories : readingHistory).length > 0
+              ? <div className="news-grid">{(savedView ? savedStories : readingHistory).map((article) => <ArticleCard key={article._id} article={article} onOpen={openArticle} />)}</div>
+              : <div className="empty-news"><span className="eyebrow">YOUR LIBRARY</span><h2>{savedView ? 'No saved stories yet' : 'No reading history yet'}</h2><p>{savedView ? 'Open a story and choose Save for later to keep it here on this device.' : 'Stories you open will appear here for quick access.'}</p></div>}
+          </section>
         ) : (
           <>
-            {featured && <section className="lead-story-section"><ArticleCard article={featured} onOpen={openArticle} featured /></section>}
-            {remaining.length > 0 && <section className="latest-section"><div className="section-title compact"><div><span className="eyebrow">FRESH FROM THE NEWSROOM</span><h2>Latest stories</h2></div><span className="article-count">{pagination.total} stories</span></div><div className="news-grid">{remaining.map((article) => <ArticleCard key={article._id} article={article} onOpen={openArticle} />)}</div></section>}
-            <nav className="pagination" aria-label="Article pages">
-              <button className="outline-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1 || loading}>← Previous</button>
-              <span>Page {pagination.page || page} of {pagination.totalPages || 1}</span>
-              <button className="outline-button" onClick={() => setPage((current) => current + 1)} disabled={page >= pagination.totalPages || loading}>Next →</button>
-            </nav>
+            {apiError && <div className="notice"><strong>News service unavailable.</strong> Start the Rwanda Today backend to load published stories. <span>{apiError}</span></div>}
+            {loading ? <div className="loading-state" role="status">Loading the latest headlines…</div> : articles.length === 0 ? (
+              <div className="empty-news"><span className="eyebrow">THE NEWSROOM</span><h2>{search ? 'No matching stories found' : 'Your next headline starts here.'}</h2><p>{search ? 'Try another search term or choose a different category.' : 'Published articles from the editorial dashboard will appear here.'}</p></div>
+            ) : (
+              <>
+                {featured && <section className="lead-story-section"><ArticleCard article={featured} onOpen={openArticle} featured /></section>}
+                {remaining.length > 0 && <section className="latest-section"><div className="section-title compact"><div><span className="eyebrow">FRESH FROM THE NEWSROOM</span><h2>Latest stories</h2></div><span className="article-count">{pagination.total} stories</span></div><div className="news-grid">{remaining.map((article) => <ArticleCard key={article._id} article={article} onOpen={openArticle} />)}</div></section>}
+                <nav className="pagination" aria-label="Article pages">
+                  <button className="outline-button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page <= 1 || loading}>← Previous</button>
+                  <span>Page {pagination.page || page} of {pagination.totalPages || 1}</span>
+                  <button className="outline-button" onClick={() => setPage((current) => current + 1)} disabled={page >= pagination.totalPages || loading}>Next →</button>
+                </nav>
+              </>
+            )}
           </>
         )}
       </main>
