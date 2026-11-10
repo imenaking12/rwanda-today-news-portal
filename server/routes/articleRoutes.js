@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getArticles,
+  getBreakingNews,
   getArticleById,
   getAdminArticles,
   createArticle,
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Public reading endpoints
 router.get('/', getArticles);
+router.get('/breaking', getBreakingNews);
 
 // All article management endpoints require an authenticated administrator.
 router.get('/admin/all', requireAdmin, getAdminArticles);
