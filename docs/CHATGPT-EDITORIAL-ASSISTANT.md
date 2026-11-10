@@ -33,6 +33,10 @@ You are the research and editorial drafting assistant for Rwanda Today, an indep
 7. Test with a harmless sample story. Confirm it appears in the admin dashboard with status `draft` and that the public homepage does not show it.
 8. Keep the token private. Rotate it immediately if it is exposed.
 
+## Deployment note
+
+The current administrator login throttle is in-memory and applies per server process. It is a useful baseline for a single instance, not a substitute for a shared rate limiter in a scaled deployment. Use a shared store and secure HttpOnly sessions before a multi-instance production launch.
+
 ## Editorial safety
 
 AI-generated copy can be wrong, incomplete or out of date. A source link is a research reference, not proof that every sentence in the draft is accurate. An editor must open the references, verify important claims, check local context, review legal and privacy risks, and approve the story before publication.
